@@ -1,0 +1,47 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart | StitchSync{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-navy font-serif">Your Cart</h1>
+    <p class="text-gray-500 text-sm mt-1">Review your custom tailoring items before checkout.</p>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Cart Items (1)</h3>
+        
+        <div class="flex items-center gap-4 py-3">
+            <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Panjabi" class="w-20 h-20 object-cover rounded-xl border border-gray-200">
+            <div class="flex-1">
+                <h4 class="font-bold text-navy">Embroidered Panjabi</h4>
+                <p class="text-xs text-gray-500 mt-1">Shop: Heritage Stitch · Profile: My Custom Fit</p>
+                <div class="font-bold text-navy mt-2">$63.00</div>
+            </div>
+            <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" title="Remove item">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm h-fit">
+        <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Order Summary</h3>
+        <div class="flex justify-between text-sm text-gray-600 mb-3">
+            <span>Subtotal</span>
+            <span class="font-bold text-navy">$63.00</span>
+        </div>
+        <div class="flex justify-between text-sm text-gray-600 mb-4">
+            <span>Pickup & Delivery</span>
+            <span class="font-bold text-navy">$5.00</span>
+        </div>
+        <hr class="border-gray-200 my-4">
+        <div class="flex justify-between text-base font-bold text-navy mb-6">
+            <span>Total</span>
+            <span>$68.00</span>
+        </div>
+        <a href="{% url 'customers:checkout' %}" class="block w-full py-3 bg-navy text-white text-center rounded-xl font-medium hover:bg-slate-800 transition">Proceed to Checkout</a>
+    </div>
+</div>
+{% endblock %}

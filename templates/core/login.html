@@ -1,0 +1,60 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Login | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8 px-4">
+    <div class="grid lg:grid-cols-2 rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+        <!-- Left Side Banner / Graphic -->
+        <div class="relative hidden lg:block min-h-[560px]">
+            <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Tailoring" class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-navy/70"></div>
+            <div class="absolute inset-0 p-12 flex flex-col justify-between text-white">
+                <span class="font-serif font-bold text-xl tracking-wide text-white">StitchSync</span>
+                <div>
+                    <h2 class="text-white text-3xl font-bold font-serif">Craft that fits your life.</h2>
+                    <p class="text-white/70 mt-3 text-sm max-w-sm">Log in to manage your orders, measurements and chats.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side Form -->
+        <div class="p-8 sm:p-12 flex flex-col justify-center">
+            <h1 class="text-navy text-2xl font-bold font-serif">Welcome back</h1>
+            <p class="text-gray-500 text-sm mt-1 mb-6">Log in to your StitchSync account.</p>
+
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl text-xs">
+                        Your username and password didn't match. Please try again.
+                    </div>
+                {% endif %}
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <div class="[&>input]:w-full [&>input]:px-4 [&>input]:py-2 [&>input]:border [&>input]:border-gray-200 [&>input]:rounded-xl [&>input]:focus:outline-none [&>input]:focus:border-navy [&>input]:text-sm">
+                            {{ form.username }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="[&>input]:w-full [&>input]:px-4 [&>input]:py-2 [&>input]:border [&>input]:border-gray-200 [&>input]:rounded-xl [&>input]:focus:outline-none [&>input]:focus:border-navy [&>input]:text-sm">
+                            {{ form.password }}
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-navy text-white rounded-xl font-medium hover:bg-slate-800 transition">Log In</button>
+            </form>
+
+            <p class="text-sm text-gray-500 text-center mt-6">
+                New here? <a href="{% url 'core:register' %}" class="text-navy font-bold hover:underline">Create an account</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Contact Us | StitchSync{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-navy font-serif">Contact Us</h1>
+    <p class="text-gray-500 text-sm mt-1">We're here to help before you place your first order.</p>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-8">
+    <!-- Contact Form Card -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-navy" placeholder="Your name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-navy" placeholder="you@example.com">
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Topic</label>
+                <select class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-navy bg-white">
+                    <option>General enquiry</option>
+                    <option>Become a tailor</option>
+                    <option>Delivery partnership</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                <textarea rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-navy" placeholder="How can we help?"></textarea>
+            </div>
+            <button type="submit" class="w-full py-3 bg-navy text-white rounded-lg font-medium hover:bg-slate-800 transition">Send Message</button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-gray-200 space-y-2 text-sm text-gray-600">
+            <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-navy"></i> support@stitchsync.com</div>
+            <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-navy"></i> +880 1700 000000</div>
+            <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-navy"></i> Gulshan, Dhaka, Bangladesh</div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div>
+        <h3 class="text-navy font-bold text-xl mb-4 font-serif">Frequently Asked Questions</h3>
+        <div class="space-y-3">
+            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                <h4 class="font-bold text-navy text-base">How long does tailoring take?</h4>
+                <p class="text-gray-500 text-sm mt-2">Most garments are delivered within 4–8 days depending on category.</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                <h4 class="font-bold text-navy text-base">Can I provide my own fabric?</h4>
+                <p class="text-gray-500 text-sm mt-2">Yes — a rider will collect it from your address before production begins.</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                <h4 class="font-bold text-navy text-base">Do you offer fitting trials?</h4>
+                <p class="text-gray-500 text-sm mt-2">Tailors can request a physical fitting trial mid-production, free of charge.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

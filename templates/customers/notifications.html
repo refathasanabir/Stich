@@ -1,0 +1,29 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Notifications | StitchSync{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-navy font-serif">Notifications</h1>
+    <p class="text-gray-500 text-sm mt-1">Stay updated on your active orders and messages.</p>
+</div>
+
+<div class="bg-white border border-gray-200 rounded-2xl shadow-sm divide-y divide-gray-200">
+    <div class="p-5 flex justify-between items-center">
+        <div>
+            <h4 class="font-bold text-navy text-base">Order #ORD-99842 Update</h4>
+            <p class="text-sm text-gray-500 mt-1">Your tailor has started the stitching phase for your Embroidered Panjabi.</p>
+        </div>
+        <span class="text-xs text-gray-400 whitespace-nowrap ml-4">2 hours ago</span>
+    </div>
+    
+    <div class="p-5 flex justify-between items-center">
+        <div>
+            <h4 class="font-bold text-navy text-base">Fitting Trial Scheduled</h4>
+            <p class="text-sm text-gray-500 mt-1">A rider will pick up your garment for a physical fitting trial tomorrow at 10 AM.</p>
+        </div>
+        <span class="text-xs text-gray-400 whitespace-nowrap ml-4">1 day ago</span>
+    </div>
+</div>
+{% endblock %}

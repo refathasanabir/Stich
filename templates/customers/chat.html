@@ -1,0 +1,73 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Messages | StitchSync{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-navy font-serif">Messages</h1>
+    <p class="text-gray-500 text-sm mt-1">Chat directly with your tailor shop.</p>
+</div>
+
+<div class="grid md:grid-cols-[280px_1fr] gap-6 items-start">
+    <!-- Chats Sidebar List -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-3 shadow-sm space-y-1">
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 cursor-pointer">
+            <div class="h-10 w-10 rounded-full bg-navy text-gold grid place-items-center text-sm font-bold">HS</div>
+            <div class="min-w-0">
+                <div class="text-sm text-navy font-bold truncate">Heritage Stitch</div>
+                <div class="text-xs text-gray-500 truncate">Sure, we'll adjust that measurement.</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+            <div class="h-10 w-10 rounded-full bg-navy text-gold grid place-items-center text-sm font-bold">RT</div>
+            <div class="min-w-0">
+                <div class="text-sm text-navy font-bold truncate">Regal Tailors</div>
+                <div class="text-xs text-gray-500 truncate">Your fabric has been received.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Chat Pane -->
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm flex flex-col h-[550px]">
+        <!-- Chat Header -->
+        <div class="p-4 border-b border-gray-200 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-navy text-gold grid place-items-center text-sm font-bold">HS</div>
+            <div>
+                <h3 class="font-bold text-navy text-base">Heritage Stitch</h3>
+                <p class="text-xs text-emerald-600 flex items-center gap-1 font-medium">● Online</p>
+            </div>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50/50">
+            <div class="flex gap-3 max-w-[80%]">
+                <div class="h-8 w-8 rounded-full bg-navy text-gold grid place-items-center text-xs font-bold shrink-0">HS</div>
+                <div>
+                    <div class="bg-white border border-gray-200 p-3 rounded-2xl rounded-tl-none text-sm text-gray-800 shadow-sm">
+                        Hello Rahim! We have received your order. Do you need any specific adjustments to the sleeve length?
+                    </div>
+                    <span class="text-[10px] text-gray-400 mt-1 block pl-1">10:42 AM</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 max-w-[80%] ml-auto flex-row-reverse">
+                <div class="h-8 w-8 rounded-full bg-gray-200 text-navy grid place-items-center text-xs font-bold shrink-0">RA</div>
+                <div>
+                    <div class="bg-navy text-white p-3 rounded-2xl rounded-tr-none text-sm shadow-sm">
+                        Yes, please keep it half an inch longer than the standard profile.
+                    </div>
+                    <span class="text-[10px] text-gray-400 mt-1 block pr-1 text-right">10:45 AM</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="p-3 border-t border-gray-200 flex gap-2 bg-white rounded-b-2xl">
+            <input type="text" placeholder="Type a message to your tailor..." class="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm">
+            <button class="px-5 py-2 bg-navy text-white rounded-xl font-medium text-sm hover:bg-slate-800 transition">Send</button>
+        </div>
+    </div>
+</div>
+<!-- wait, standard end block -->
+{% endblock %}

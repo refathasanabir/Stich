@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Heritage Stitch | StitchSync{% endblock %}
+
+{% block content %}
+<div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mb-8">
+    <div class="relative h-52">
+        <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Shop banner" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-navy/80 to-transparent"></div>
+        <div class="absolute bottom-6 left-6 text-white">
+            <h1 class="text-3xl font-bold font-serif">Heritage Stitch</h1>
+            <p class="text-white/80 text-sm mt-1">★ 4.9 · 142 orders · Gulshan, Dhaka</p>
+        </div>
+    </div>
+    <div class="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <p class="text-gray-600 text-sm max-w-xl">Master tailoring artisans specializing in bespoke panjabis, executive suits, and traditional wear with over 15 years of expert craftsmanship.</p>
+        <a href="{% url 'core:login' %}" class="px-6 py-3 bg-navy text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition">Order from this Shop</a>
+    </div>
+</div>
+
+<h3 class="text-navy font-bold text-xl mb-4 font-serif">Available Designs</h3>
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Design" class="w-full h-40 object-cover">
+        <div class="p-4">
+            <h4 class="font-bold text-navy text-base">Classic Panjabi</h4>
+            <div class="flex items-center justify-between mt-3">
+                <span class="font-serif text-navy font-bold text-lg">$65</span>
+                <a href="{% url 'core:login' %}" class="px-3 py-1.5 bg-navy text-white text-xs rounded-lg hover:bg-slate-800 transition">Order</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

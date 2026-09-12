@@ -1,0 +1,115 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Customer Dashboard | StitchSync{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-[#0A192F] font-serif">Welcome back, Rahim</h1>
+        <p class="text-gray-500 text-sm mt-1">Here's what's happening with your orders.</p>
+    </div>
+    <a href="{% url 'measurements:new' %}" class="px-5 py-2.5 bg-[#0A192F] text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition inline-flex items-center gap-2 w-fit">
+        <i data-lucide="plus" class="w-4 h-4"></i> New Order / Measurement
+    </a>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 grid place-items-center"><i data-lucide="check-circle-2" class="w-5 h-5"></i></div>
+            <div>
+                <div class="text-xs text-gray-500">Active Orders</div>
+                <div class="text-xl font-bold text-[#0A192F]">1</div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 grid place-items-center"><i data-lucide="ruler" class="w-5 h-5"></i></div>
+            <div>
+                <div class="text-xs text-gray-500">Saved Profiles</div>
+                <div class="text-xl font-bold text-[#0A192F]">3</div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center"><i data-lucide="download" class="w-5 h-5"></i></div>
+            <div>
+                <div class="text-xs text-gray-500">Completed</div>
+                <div class="text-xl font-bold text-[#0A192F]">1</div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-slate-100 text-[#0A192F] grid place-items-center"><i data-lucide="wallet" class="w-5 h-5"></i></div>
+            <div>
+                <div class="text-xs text-gray-500">Total Spent</div>
+                <div class="text-xl font-bold text-[#0A192F]">$208</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Order Banner -->
+<div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Active Order · ORD-99842</span>
+            <h3 class="text-lg font-bold text-[#0A192F] mt-0.5">Embroidered Panjabi — Heritage Stitch</h3>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold rounded-full">Stitching</span>
+            <a href="{% url 'customers:orders' %}" class="px-4 py-2 bg-gray-100 text-[#0A192F] text-xs font-medium rounded-xl hover:bg-gray-200 transition">Track</a>
+        </div>
+    </div>
+    <!-- Simple Stepper view -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+        <div class="p-2 bg-emerald-50 text-emerald-700 rounded-lg font-medium border border-emerald-200">1. Order Accepted</div>
+        <div class="p-2 bg-emerald-50 text-emerald-700 rounded-lg font-medium border border-emerald-200">2. Cutting</div>
+        <div class="p-2 bg-amber-50 text-amber-700 rounded-lg font-bold border border-amber-200">3. Stitching (Current)</div>
+        <div class="p-2 bg-gray-50 text-gray-400 rounded-lg">4. Ready</div>
+        <div class="p-2 bg-gray-50 text-gray-400 rounded-lg">5. Delivered</div>
+    </div>
+</div>
+
+<!-- Recent Orders Table -->
+<div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+    <h3 class="text-[#0A192F] font-bold text-base mb-4">Recent Orders</h3>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead>
+                <tr class="border-b border-gray-200 text-gray-400 text-xs uppercase">
+                    <th class="pb-3 font-semibold">Order ID</th>
+                    <th class="pb-3 font-semibold">Item</th>
+                    <th class="pb-3 font-semibold">Shop</th>
+                    <th class="pb-3 font-semibold">Date</th>
+                    <th class="pb-3 font-semibold">Status</th>
+                    <th class="pb-3 font-semibold text-right">Receipt</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <tr>
+                    <td class="py-4 font-bold text-[#0A192F]">ORD-99842</td>
+                    <td class="py-4 text-gray-800">Embroidered Panjabi</td>
+                    <td class="py-4 text-gray-500">Heritage Stitch</td>
+                    <td class="py-4 text-gray-500">2026-07-15</td>
+                    <td class="py-4"><span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full">Stitching</span></td>
+                    <td class="py-4 text-right"><a href="#" class="p-2 inline-flex border border-gray-200 rounded-lg hover:bg-gray-50 transition text-[#0A192F]"><i data-lucide="download" class="w-4 h-4"></i></a></td>
+                </tr>
+                <tr>
+                    <td class="py-4 font-bold text-[#0A192F]">ORD-99765</td>
+                    <td class="py-4 text-gray-800">Classic Two-Piece Suit</td>
+                    <td class="py-4 text-gray-500">Regal Tailors</td>
+                    <td class="py-4 text-gray-500">2026-07-02</td>
+                    <td class="py-4"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full">Delivered</span></td>
+                    <td class="py-4 text-right"><a href="#" class="p-2 inline-flex border border-gray-200 rounded-lg hover:bg-gray-50 transition text-[#0A192F]"><i data-lucide="download" class="w-4 h-4"></i></a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
