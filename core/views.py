@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Design
+from django.contrib.auth import logout
 
 
 def home(request):
@@ -20,19 +21,34 @@ def contact(request):
     return render(request, "core/contact.html")
 
 
+def redirect_based_on_role(user):
+    """Helper function to route users to their correct dashboard based on profile role."""
+    try:
+        role = user.profile.role
+        if role == "Tailor":
+            return redirect(
+                "tailors:dashboard"
+            )  # Adjust name based on your tailor urls
+        elif role == "Rider":
+            return redirect("riders:dashboard")  # Adjust name based on your rider urls
+        elif user.is_superuser or role == "Admin":
+            return redirect("/admin/")
+    except Exception:
+        pass
+    return redirect("customers:dashboard")  # Default fallback for Customers
+
+
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect("customers:dashboard")
+        return redirect_based_on_role(request.user)
 
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password")
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect("customers:dashboard")
+            # form.get_user() is safer and cleaner in Django than manual authenticate() after validation
+            user = form.get_user()
+            login(request, user)
+            return redirect_based_on_role(user)
     else:
         form = AuthenticationForm()
 
@@ -44,15 +60,52 @@ def register_view(request):
         return redirect("customers:dashboard")
 
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect("customers:dashboard")
-    else:
-        form = UserCreationForm()
+        role = request.POST.get("role", "Customer")
 
-    return render(request, "core/register.html", {"form": form})
+        # Extract fields dynamically based on selected tab
+        if role == "Tailor":
+            username = request.POST.get("username_tailor")
+            email = request.POST.get("email_tailor")
+            password = request.POST.get("password_tailor")
+            shop_name = request.POST.get("shop_name")
+
+            if username and password and email:
+                user = User.objects.create_user(
+                    username=username, email=email, password=password
+                )
+                UserProfile.objects.create(
+                    user=user, role="Tailor", shop_name=shop_name
+                )
+                login(request, user)
+                return redirect("tailors:dashboard")  # Or tailor dashboard URL
+
+        elif role == "Rider":
+            username = request.POST.get("username_rider")
+            password = request.POST.get("password_rider")
+            vehicle_type = request.POST.get("vehicle_type", "Motorcycle")
+
+            if username and password:
+                user = User.objects.create_user(username=username, password=password)
+                UserProfile.objects.create(
+                    user=user, role="Rider", vehicle_type=vehicle_type
+                )
+                login(request, user)
+                return redirect("riders:dashboard")  # Or rider dashboard URL
+
+        else:  # Customer
+            username = request.POST.get("username")
+            email = request.POST.get("email")
+            password = request.POST.get("password")
+
+            if username and password:
+                user = User.objects.create_user(
+                    username=username, email=email, password=password
+                )
+                UserProfile.objects.create(user=user, role="Customer")
+                login(request, user)
+                return redirect("customers:dashboard")
+
+    return render(request, "core/register.html")
 
 
 def tailor_list(request):
@@ -78,3 +131,8 @@ def gallery_view(request):
     # Fetch all design items to show in the public gallery
     gallery_items = Design.objects.all().order_by("-created_at")
     return render(request, "core/gallery.html", {"gallery_items": gallery_items})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("core:home")

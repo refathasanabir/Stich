@@ -1,28 +1,73 @@
 <!-- Dedicated Customer Navigation Bar -->
 <header class="sticky top-0 z-40 bg-navy text-white shadow-md">
-    <div class="max-w-[1200px] mx-auto px-4 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <a href="{% url 'customers:dashboard' %}" class="font-serif font-bold text-xl tracking-wide text-white">StitchSync</a>
-            <span class="hidden sm:inline text-[10px] uppercase tracking-widest text-gold border border-gold/40 rounded-full px-2.5 py-0.5 font-bold">
-                Customer Panel
-            </span>
-        </div>
-        
-        <nav class="hidden md:flex items-center gap-1">
-            <a href="{% url 'customers:dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition">Dashboard</a>
-            <a href="{% url 'core:marketplace' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition">Marketplace</a>
-            <a href="{% url 'customers:profiles' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition">Profiles</a>
-            <a href="{% url 'customers:orders' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition">Orders</a>
-            <a href="{% url 'customers:cart' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition">Cart</a>
-            <a href="{% url 'customers:chat' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition">Messages</a>
-            <a href="{% url 'customers:settings' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition">Settings</a>
-        </nav>
-
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-300 hidden sm:inline">{{ request.user.username }}</span>
-            <a href="{% url 'core:login' %}" class="p-2 text-gray-300 hover:text-white transition flex items-center gap-1 text-sm font-medium" title="Logout">
-                <span class="hidden sm:inline">Logout</span>
-            </a>
-        </div>
+  <div
+    class="max-w-[1200px] mx-auto px-4 h-16 flex items-center justify-between"
+  >
+    <div class="flex items-center gap-3">
+      <a
+        href="{% url 'customers:dashboard' %}"
+        class="font-serif font-bold text-xl tracking-wide text-white"
+        >StitchSync</a
+      >
+      <span
+        class="hidden sm:inline text-[10px] uppercase tracking-widest text-gold border border-gold/40 rounded-full px-2.5 py-0.5 font-bold"
+      >
+        Customer Panel
+      </span>
     </div>
+
+    <nav class="hidden md:flex items-center gap-1">
+      <a
+        href="{% url 'customers:dashboard' %}"
+        class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition"
+        >Dashboard</a
+      >
+      <a
+        href="{% url 'core:marketplace' %}"
+        class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition"
+        >Marketplace</a
+      >
+      <a
+        href="{% url 'customers:profiles' %}"
+        class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition"
+        >Profiles</a
+      >
+      <a
+        href="{% url 'customers:orders' %}"
+        class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition"
+        >Orders</a
+      >
+      <a
+        href="{% url 'customers:cart' %}"
+        class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition"
+        >Cart</a
+      >
+      <a
+        href="{% url 'customers:chat' %}"
+        class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition"
+        >Messages</a
+      >
+      <a
+        href="{% url 'customers:settings' %}"
+        class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/10 transition"
+        >Settings</a
+      >
+    </nav>
+
+    <div class="flex items-center gap-4">
+      <span class="text-sm text-gray-300 hidden sm:inline"
+        >{{ request.user.username }}</span
+      >
+      <form action="{% url 'core:logout' %}" method="POST" class="inline">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="p-2 text-gray-300 hover:text-white transition flex items-center gap-1 text-sm font-medium"
+          title="Logout"
+        >
+          <span class="hidden sm:inline">Logout</span>
+        </button>
+      </form>
+    </div>
+  </div>
 </header>
