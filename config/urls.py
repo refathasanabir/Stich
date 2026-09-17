@@ -8,6 +8,9 @@ urlpatterns = [
     path("", include("core.urls")),
     path("customer/", include("customers.urls")),
     path("measurements/", include("measurements.urls")),
+    path("tailor/", include("tailors.urls")),
+    # path("rider/", include("riders.urls")), # Uncomment if you have a riders app
+    path("rider/", include("riders.urls")),
 ]
 
 if settings.DEBUG:

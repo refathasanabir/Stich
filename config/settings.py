@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "tailors",
     "measurements",
     "adminpanel",
+    "riders",
 ]
 
 MIDDLEWARE = [

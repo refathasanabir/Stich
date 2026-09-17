@@ -8,7 +8,7 @@ from tailors.models import TailorShop
 
 from .models import Design, UserProfile
 from adminpanel.models import Approval
-
+from adminpanel.models import Approval
 
 def home(request):
     return render(request, "core/home.html")
@@ -126,10 +126,12 @@ def register_view(request):
                 messages.error(request, "This username is already taken.")
                 return render(request, "core/register.html")
 
-            # 1. Create Base User
+            # 1. Create Base User and lock it
             user = User.objects.create_user(
                 username=username, email=email, password=password
             )
+            user.is_active = False
+            user.save()
 
             # 2. Create UserProfile (with Pending status)
             UserProfile.objects.create(
@@ -141,6 +143,9 @@ def register_view(request):
 
             # 3. Create linked TailorShop
             TailorShop.objects.create(owner=user, name=shop_name)
+
+            # 4. Create the Admin Approval Record
+            Approval.objects.create(user=user, role="Tailor", status="Pending")
 
             messages.success(
                 request, "Tailor account created successfully! Awaiting Admin approval."
@@ -164,8 +169,12 @@ def register_view(request):
                 messages.error(request, "This username is already taken.")
                 return render(request, "core/register.html")
 
+            # 1. Create Base User and lock it
             user = User.objects.create_user(username=username, password=password)
+            user.is_active = False
+            user.save()
 
+            # 2. Create UserProfile
             UserProfile.objects.create(
                 user=user,
                 role="Rider",
@@ -173,6 +182,9 @@ def register_view(request):
                 vehicle_type=vehicle_type,
                 phone=phone,
             )
+
+            # 3. Create the Admin Approval Record
+            Approval.objects.create(user=user, role="Rider", status="Pending")
 
             messages.success(
                 request, "Rider account created successfully! Awaiting Admin approval."

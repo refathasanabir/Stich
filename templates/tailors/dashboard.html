@@ -1,0 +1,15 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Tailor Dashboard | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 text-center">
+    <h1 class="text-3xl font-bold font-serif text-navy mb-4">Welcome, {{ user.username }}!</h1>
+    <p class="text-gray-500 mb-8">Your full Tailor Dashboard is coming soon.</p>
+    
+    <!-- Emergency Logout Button -->
+    <a href="{% url 'core:logout' %}" class="bg-red-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-600 transition">
+        Log Out
+    </a>
+</div>
+{% endblock %}

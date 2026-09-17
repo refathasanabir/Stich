@@ -10,7 +10,7 @@ from datetime import date, datetime
 from decimal import Decimal
 import csv
 import calendar
-
+from tailors.models import TailorShop
 from .models import (
     Approval,
     ClothingCategory,
@@ -99,11 +99,11 @@ def approvals(request):
 
         if query:
             approvals = approvals.filter(
-                Q(user__username__icontains=query) |
-                Q(user__first_name__icontains=query) |
-                Q(user__last_name__icontains=query) |
-                Q(user__email__icontains=query) |
-                Q(user__profile__shop_name__icontains=query)
+                Q(user__username__icontains=query)
+                | Q(user__first_name__icontains=query)
+                | Q(user__last_name__icontains=query)
+                | Q(user__email__icontains=query)
+                | Q(user__shop__name__icontains=query)
             )
 
     context = {
@@ -121,48 +121,43 @@ def approvals(request):
 
 @user_passes_test(is_admin, login_url="/login/")
 def approve_approval(request, approval_id):
-
     if request.method == "POST":
+        approval = get_object_or_404(Approval, id=approval_id)
 
-        approval = get_object_or_404(
-            Approval,
-            id=approval_id
-        )
-
+        # 1. Update Approval record
         approval.status = "Approved"
         approval.reviewed_at = timezone.now()
         approval.save()
 
+        # 2. Activate User
         approval.user.is_active = True
         approval.user.save()
 
-        messages.success(
-            request,
-            "Account approved successfully."
-        )
+        # 3. Sync Profile Status (NEW)
+        profile = approval.user.profile
+        profile.approval_status = "Approved"
+        profile.save()
 
+        messages.success(request, "Account approved successfully.")
     return redirect("adminpanel:approvals")
 
 
 @user_passes_test(is_admin, login_url="/login/")
 def reject_approval(request, approval_id):
-
     if request.method == "POST":
+        approval = get_object_or_404(Approval, id=approval_id)
 
-        approval = get_object_or_404(
-            Approval,
-            id=approval_id
-        )
-
+        # 1. Update Approval record
         approval.status = "Rejected"
         approval.reviewed_at = timezone.now()
         approval.save()
 
-        messages.success(
-            request,
-            "Account rejected."
-        )
+        # 2. Sync Profile Status (NEW)
+        profile = approval.user.profile
+        profile.approval_status = "Rejected"
+        profile.save()
 
+        messages.success(request, "Account rejected.")
     return redirect("adminpanel:approvals")
 
 
@@ -204,26 +199,25 @@ def customers(request):
     )
 
 
+
+
+
 @user_passes_test(is_admin, login_url="/login/")
 def tailor_shops(request):
-
     query = request.GET.get("q", "").strip()
     status = request.GET.get("status", "All")
 
-    shops = UserProfile.objects.filter(
-        role="Tailor"
-    ).select_related(
-        "user"
-    )
+    # Query the TailorShop model directly instead of UserProfile
+    shops = TailorShop.objects.select_related("owner")
 
     if query:
         shops = shops.filter(
-            Q(shop_name__icontains=query) |
-            Q(user__username__icontains=query) |
-            Q(user__email__icontains=query)
+            Q(name__icontains=query)
+            | Q(owner__username__icontains=query)
+            | Q(owner__email__icontains=query)
         )
 
-    shops = shops.order_by("-user__date_joined")
+    shops = shops.order_by("-created_at")
 
     return render(
         request,
@@ -232,7 +226,7 @@ def tailor_shops(request):
             "shops": shops,
             "query": query,
             "status": status,
-        }
+        },
     )
 
 
