@@ -4,52 +4,108 @@
 {% block title %}Measurement Profiles | StitchSync{% endblock %}
 
 {% block content %}
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-    <div>
-        <h1 class="text-3xl font-bold text-navy font-serif">Measurement Profiles</h1>
-        <p class="text-gray-500 text-sm mt-1">Save measurements for yourself and family members.</p>
-    </div>
-    <a href="{% url 'measurements:new' %}" class="px-5 py-2.5 bg-navy text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition inline-flex items-center gap-2 w-fit">
-        <i data-lucide="plus" class="w-4 h-4"></i> Add Profile
-    </a>
-</div>
+<div class="max-w-[1200px] mx-auto py-8 px-4">
 
-<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for p in profiles %}
-    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <div class="flex items-center gap-3">
-            <span class="h-12 w-12 rounded-full bg-navy text-gold grid place-items-center font-bold text-base">{{ p.name|slice:":1" }}</span>
-            <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                    <h3 class="text-navy font-bold text-base truncate">{{ p.name }}</h3>
-                    {% if p.is_default %}
-                        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold rounded-full">Default</span>
-                    {% endif %}
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-navy font-serif">Measurement Profiles</h1>
+            <p class="text-gray-500 text-sm mt-1">Save measurements for yourself and family members.</p>
+        </div>
+
+        <a href="{% url 'measurements:new' %}"
+           class="px-5 py-2.5 bg-navy text-white rounded-xl text-sm font-medium hover:bg-slate-800 transition inline-flex items-center gap-2 w-fit shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Profile
+        </a>
+    </div>
+
+    <!-- Profiles Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for p in profiles %}
+
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition hover:shadow-md">
+
+            <!-- Small Gold Accent -->
+            <div class="h-1 bg-gold"></div>
+
+            <div class="p-6">
+                <!-- Profile Header -->
+                <div class="flex items-center gap-3">
+                    <span class="h-12 w-12 rounded-full bg-navy text-gold grid place-items-center font-bold text-base shrink-0">
+                        {{ p.name|slice:":1" }}
+                    </span>
+
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-navy font-bold text-base truncate">{{ p.name }}</h3>
+
+                            {% if p.is_default %}
+                            <span class="px-2.5 py-1 bg-navy text-gold text-[10px] font-semibold rounded-full uppercase tracking-wide">
+                                Default
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-xs text-gray-500 mt-1">
+                            {{ p.relation }} · {{ p.gender }} · {{ p.category }}
+                        </div>
+                    </div>
                 </div>
-                <div class="text-xs text-gray-500 mt-0.5">{{ p.relation }} · {{ p.gender }} · {{ p.category }}</div>
+
+                <!-- Profile Information -->
+                <div class="mt-5 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                    <div class="flex items-center justify-between gap-4 text-xs">
+                        <div>
+                            <span class="block text-[10px] uppercase tracking-wider font-semibold text-gray-400">Updated</span>
+                            <span class="text-gray-600 font-medium">{{ p.updated }}</span>
+                        </div>
+
+                        <div class="text-right">
+                            <span class="block text-[10px] uppercase tracking-wider font-semibold text-gray-400">Measurements</span>
+                            <span class="text-navy font-semibold">{{ p.values|length }} specs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+                    <a href="{% url 'measurements:edit_measurement' p.id %}"
+                       class="flex-1 py-2.5 border-2 border-navy text-navy text-center text-xs font-semibold rounded-lg hover:bg-navy hover:text-white transition">
+                        Edit
+                    </a>
+
+                    <form action="{% url 'measurements:delete_measurement' p.id %}"
+                          method="POST"
+                          onsubmit="return confirm('Are you sure you want to delete this profile?');">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="h-10 w-10 grid place-items-center rounded-lg border border-gray-200 text-red-500 hover:bg-red-50 transition"
+                                title="Delete">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
-        
-        <!-- Display Saved Dynamic Values Count -->
-        <div class="text-xs text-gray-400 mt-4">Updated {{ p.updated }} · {{ p.values|length }} specs recorded</div>
-        
-        <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-            <!-- Edit Button linking with ID -->
-            <a href="{% url 'measurements:edit_measurement' p.id %}" class="flex-1 py-2 bg-gray-50 border border-gray-200 text-navy text-center text-xs font-medium rounded-xl hover:bg-gray-100 transition">Edit</a>
-            
-            <!-- Delete Button Form / Link -->
-            <form action="{% url 'measurements:delete_measurement' p.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this profile?');">
-                {% csrf_token %}
-                <button type="submit" class="px-3 py-2 border border-gray-200 text-red-500 rounded-xl hover:bg-red-50 transition" title="Delete">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-            </form>
+
+        {% empty %}
+        <div class="col-span-full bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
+            <div class="h-12 w-12 mx-auto rounded-xl bg-navy text-gold grid place-items-center mb-4">
+                <i data-lucide="ruler" class="w-5 h-5"></i>
+            </div>
+
+            <h3 class="text-navy font-bold text-lg mb-2">No measurement profiles found</h3>
+            <p class="text-gray-500 text-sm mb-6">Create a profile to save measurements for yourself or a family member.</p>
+
+            <a href="{% url 'measurements:new' %}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-gold text-navy rounded-lg text-sm font-semibold hover:brightness-105 transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Add Profile
+            </a>
         </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <div class="col-span-full py-12 text-center text-gray-400">
-        No measurement profiles found. Click "Add Profile" to create one.
-    </div>
-    {% endfor %}
+
 </div>
 {% endblock %}

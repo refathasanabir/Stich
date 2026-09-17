@@ -9,6 +9,7 @@ from tailors.models import TailorShop
 from .models import Design, UserProfile
 from adminpanel.models import Approval
 from adminpanel.models import Approval
+from django.db.models import Q
 
 def home(request):
     return render(request, "core/home.html")
@@ -262,18 +263,42 @@ def marketplace_gallery_view(request):
     )
 
 
-def marketplace_detail_view(request, pk):
+def marketplace_gallery_view(request):
+    designs = Design.objects.all()
 
-    design = get_object_or_404(
-        Design,
-        pk=pk
-    )
+    # 1. Search filter (by design title, description, or shop name)
+    search_query = request.GET.get("q", "").strip()
+    if search_query:
+        designs = designs.filter(
+            Q(title__icontains=search_query)
+            | Q(description__icontains=search_query)
+            | Q(shop__name__icontains=search_query)
+        )
 
-    return render(
-        request,
-        "core/marketplace_detail.html",
-        {"design": design}
-    )
+    # 2. Category filter (Shirt, Panjabi, Suit, etc.)
+    category = request.GET.get("category", "").strip()
+    if category and category != "All":
+        designs = designs.filter(category=category)
+
+    # 3. Sorting options (Newest, Price low/high, Rating)
+    sort_by = request.GET.get("sort", "newest")
+    if sort_by == "price_low":
+        designs = designs.order_by("price")
+    elif sort_by == "price_high":
+        designs = designs.order_by("-price")
+    elif sort_by == "rating":
+        designs = designs.order_by("-rating")
+    else:
+        designs = designs.order_by("-created_at")
+
+    context = {
+        "designs": designs,
+        "search_query": search_query,
+        "selected_category": category,
+        "selected_sort": sort_by,
+    }
+
+    return render(request, "core/marketplace.html", context)
 
 
 def gallery_view(request):
@@ -287,6 +312,11 @@ def gallery_view(request):
         "core/gallery.html",
         {"gallery_items": gallery_items}
     )
+
+
+def marketplace_detail_view(request, pk):
+    design = get_object_or_404(Design, pk=pk)
+    return render(request, "core/marketplace_detail.html", {"design": design})
 
 
 # =========================================================

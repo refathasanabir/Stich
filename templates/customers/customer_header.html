@@ -1,0 +1,27 @@
+<nav class="bg-navy text-white px-6 py-4 flex items-center justify-between shadow-md">
+    <div class="flex items-center gap-8">
+        <a href="{% url 'core:marketplace' %}" class="font-serif text-xl font-bold text-gold flex items-center gap-2">
+            <span class="h-8 w-8 rounded-lg bg-gold text-navy grid place-items-center text-sm font-sans">✂️</span> 
+            StitchSync 
+            <span class="text-[10px] bg-gold/20 text-gold px-2 py-0.5 rounded-full uppercase tracking-wider font-sans">Customer</span>
+        </a>
+        <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+    <a href="{% url 'core:marketplace' %}" class="hover:text-gold transition">Marketplace</a>
+    <a href="{% url 'core:tailor_list' %}" class="hover:text-gold transition">Shops</a>
+    <a href="{% url 'customers:profiles' %}" class="hover:text-gold transition">Measurements</a>
+    <a href="{% url 'customers:orders' %}" class="hover:text-gold transition">Tracking</a>
+    <a href="{% url 'customers:chat' %}" class="hover:text-gold transition">Chat</a>
+    <a href="{% url 'customers:dashboard' %}" class="hover:text-gold transition">Dashboard</a>
+</div>
+    </div>
+    
+    <div class="flex items-center gap-4">
+        <span class="h-8 w-8 rounded-full bg-gold text-navy font-bold grid place-items-center text-sm">
+            {{ request.user.username|slice:":1"|upper }}
+        </span>
+        <form action="{% url 'core:logout' %}" method="POST" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="text-xs text-gray-300 hover:text-white transition">Logout</button>
+        </form>
+    </div>
+</nav>

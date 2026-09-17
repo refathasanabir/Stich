@@ -2,474 +2,356 @@
 
 <!-- ================= ADMIN HEADER ================= -->
 <header class="sticky top-0 z-50 bg-[#0A192F] border-b border-white/10">
-
-    <div class="max-w-[1200px] mx-auto px-4">
-
-        <div class="h-16 flex items-center justify-between">
-
-            <!-- ================= LOGO ================= -->
-            <a href="{% url 'adminpanel:dashboard' %}"
-               class="flex items-center gap-3 shrink-0">
-
-                <span class="font-serif font-bold text-xl tracking-wide text-white">
-                    StitchSync
-                </span>
-
-                <span class="hidden sm:inline-flex items-center rounded-full
-                             border border-[#D4AF37]/60
-                             px-3 py-1 text-[10px] font-bold uppercase
-                             tracking-wider text-[#D4AF37]">
-                    Admin Panel
-                </span>
-
-            </a>
-
-
-            <!-- ================= ADMIN NAVIGATION ================= -->
-            <nav class="hidden lg:flex items-center gap-1">
-
-
-                <!-- ================= DASHBOARD ================= -->
-                <a href="{% url 'adminpanel:dashboard' %}"
-                   class="px-4 py-2 text-sm font-semibold text-white/90
-                          hover:text-white hover:bg-white/5
-                          rounded-lg transition">
-
-                    Dashboard
-
-                </a>
-
-
-                <!-- ================= USERS DROPDOWN ================= -->
-                <div class="relative" data-dropdown>
-
-                    <button
-                        type="button"
-                        class="dropdown-button flex items-center gap-1
-                               px-4 py-2 text-sm font-semibold
-                               text-white/90 hover:text-white
-                               hover:bg-white/5 rounded-lg transition">
-
-                        Users
-
-                        <svg
-                            class="dropdown-icon w-4 h-4 transition-transform duration-200"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            viewBox="0 0 24 24">
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="m6 9 6 6 6-6" />
-
-                        </svg>
-
-                    </button>
-
-
-                    <!-- Users Dropdown -->
-                    <div
-                        class="dropdown-menu absolute left-0
-                               top-[calc(100%-2px)]
-                               hidden z-50 pt-2">
-
-                        <div class="w-52 rounded-xl bg-white
-                                    border border-gray-200
-                                    shadow-xl py-2">
-
-                            <a
-                                href="{% url 'adminpanel:approvals' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Pending Approvals
-
-                            </a>
-
-
-                            <a
-                                href="{% url 'adminpanel:customers' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Customers
-
-                            </a>
-
-
-                            <a
-                                href="{% url 'adminpanel:tailor_shops' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Tailor Shops
-
-                            </a>
-
-
-                            <a
-                                href="{% url 'adminpanel:riders' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Riders
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ================= ORDERS ================= -->
-                <a href="{% url 'adminpanel:orders' %}"
-                   class="px-4 py-2 text-sm font-semibold text-white/90
-                          hover:text-white hover:bg-white/5
-                          rounded-lg transition">
-
-                    Orders
-
-                </a>
-
-
-                <!-- ================= MANAGEMENT DROPDOWN ================= -->
-                <div class="relative" data-dropdown>
-
-                    <button
-                        type="button"
-                        class="dropdown-button flex items-center gap-1
-                               px-4 py-2 text-sm font-semibold
-                               text-white/90 hover:text-white
-                               hover:bg-white/5 rounded-lg transition">
-
-                        Management
-
-                        <svg
-                            class="dropdown-icon w-4 h-4 transition-transform duration-200"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            viewBox="0 0 24 24">
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="m6 9 6 6 6-6" />
-
-                        </svg>
-
-                    </button>
-
-
-                    <!-- Management Dropdown -->
-                    <div
-                        class="dropdown-menu absolute left-0
-                               top-[calc(100%-2px)]
-                               hidden z-50 pt-2">
-
-                        <div class="w-60 rounded-xl bg-white
-                                    border border-gray-200
-                                    shadow-xl py-2">
-
-
-                            <a
-                                href="{% url 'adminpanel:categories' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Clothing Categories
-
-                            </a>
-
-
-                            <a
-                                href="{% url 'adminpanel:measurements' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Measurement Categories
-
-                            </a>
-
-
-                            <a
-                                href="{% url 'adminpanel:delivery_charges' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Delivery Charge Rules
-
-                            </a>
-
-
-                            <a
-                                href="{% url 'adminpanel:commission_rules' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Commission Rules
-
-                            </a>
-
-
-                            <a
-                                href="{% url 'adminpanel:campaigns' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Campaigns
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ================= REPORTS DROPDOWN ================= -->
-                <div class="relative" data-dropdown>
-
-                    <button
-                        type="button"
-                        class="dropdown-button flex items-center gap-1
-                               px-4 py-2 text-sm font-semibold
-                               text-white/90 hover:text-white
-                               hover:bg-white/5 rounded-lg transition">
-
-                        Reports
-
-                        <svg
-                            class="dropdown-icon w-4 h-4 transition-transform duration-200"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            viewBox="0 0 24 24">
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="m6 9 6 6 6-6" />
-
-                        </svg>
-
-                    </button>
-
-
-                    <!-- Reports Dropdown -->
-                    <div
-                        class="dropdown-menu absolute left-0
-                               top-[calc(100%-2px)]
-                               hidden z-50 pt-2">
-
-                        <div class="w-60 rounded-xl bg-white
-                                    border border-gray-200
-                                    shadow-xl py-2">
-
-
-                            <!-- Revenue Reports -->
-                            <a
-                                href="{% url 'adminpanel:revenue_reports' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Revenue Reports
-
-                            </a>
-
-
-                            <!-- Monthly Sales -->
-                            <a
-                                href="{% url 'adminpanel:monthly_sales_reports' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Monthly Sales Reports
-
-                            </a>
-
-
-                            <!-- Order Statistics -->
-                            <a
-                                href="{% url 'adminpanel:order_statistics' %}"
-                                class="block px-4 py-2.5 text-sm text-gray-700
-                                       hover:bg-gray-100
-                                       hover:text-[#0A192F] transition">
-
-                                Order Statistics
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ================= PROFILE ================= -->
-                <a href="{% url 'adminpanel:profile' %}"
-                   class="px-4 py-2 text-sm font-semibold text-white/90
-                          hover:text-white hover:bg-white/5
-                          rounded-lg transition">
-
-                    Profile
-
-                </a>
-
-            </nav>
-
-
-            <!-- ================= RIGHT SIDE ================= -->
-            <div class="flex items-center gap-4 shrink-0">
-
-
-                <!-- User Avatar -->
-                <div
-                    class="w-9 h-9 rounded-full bg-white
-                           flex items-center justify-center
-                           text-[#0A192F] font-bold">
-
-                    {{ request.user.username|first|upper }}
-
-                </div>
-
-
-                <!-- Logout -->
-                <a
-                    href="{% url 'core:logout' %}"
-                    class="text-sm font-medium text-white/80
-                           hover:text-white transition">
-
-                    Logout
-
-                </a>
-
+  <div class="max-w-[1200px] mx-auto px-4">
+    <div class="h-16 flex items-center justify-between">
+      <!-- ================= LOGO ================= -->
+      <a
+        href="{% url 'adminpanel:dashboard' %}"
+        class="flex items-center gap-3 shrink-0"
+      >
+        <span class="font-serif font-bold text-xl tracking-wide text-white">
+          StitchSync
+        </span>
+
+        <span
+          class="hidden sm:inline-flex items-center rounded-full border border-[#D4AF37]/60 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#D4AF37]"
+        >
+          Admin Panel
+        </span>
+      </a>
+
+      <!-- ================= ADMIN NAVIGATION ================= -->
+      <nav class="hidden lg:flex items-center gap-1">
+        <!-- ================= DASHBOARD ================= -->
+        <a
+          href="{% url 'adminpanel:dashboard' %}"
+          class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/5 rounded-lg transition"
+        >
+          Dashboard
+        </a>
+
+        <!-- ================= USERS DROPDOWN ================= -->
+        <div class="relative" data-dropdown>
+          <button
+            type="button"
+            class="dropdown-button flex items-center gap-1 px-4 py-2 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/5 rounded-lg transition"
+          >
+            Users
+
+            <svg
+              class="dropdown-icon w-4 h-4 transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m6 9 6 6 6-6"
+              />
+            </svg>
+          </button>
+
+          <!-- Users Dropdown -->
+          <div
+            class="dropdown-menu absolute left-0 top-[calc(100%-2px)] hidden z-50 pt-2"
+          >
+            <div
+              class="w-52 rounded-xl bg-white border border-gray-200 shadow-xl py-2"
+            >
+              <a
+                href="{% url 'adminpanel:approvals' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Pending Approvals
+              </a>
+
+              <a
+                href="{% url 'adminpanel:customers' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Customers
+              </a>
+
+              <a
+                href="{% url 'adminpanel:tailor_shops' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Tailor Shops
+              </a>
+
+              <a
+                href="{% url 'adminpanel:riders' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Riders
+              </a>
             </div>
-
+          </div>
         </div>
 
+        <!-- ================= ORDERS ================= -->
+        <a
+          href="{% url 'adminpanel:orders' %}"
+          class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/5 rounded-lg transition"
+        >
+          Orders
+        </a>
+
+        <!-- ================= MANAGEMENT DROPDOWN ================= -->
+        <div class="relative" data-dropdown>
+          <button
+            type="button"
+            class="dropdown-button flex items-center gap-1 px-4 py-2 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/5 rounded-lg transition"
+          >
+            Management
+
+            <svg
+              class="dropdown-icon w-4 h-4 transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m6 9 6 6 6-6"
+              />
+            </svg>
+          </button>
+
+          <!-- Management Dropdown -->
+          <div
+            class="dropdown-menu absolute left-0 top-[calc(100%-2px)] hidden z-50 pt-2"
+          >
+            <div
+              class="w-60 rounded-xl bg-white border border-gray-200 shadow-xl py-2"
+            >
+              <a
+                href="{% url 'adminpanel:categories' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Clothing Categories
+              </a>
+
+              <a
+                href="{% url 'adminpanel:measurements' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Measurement Categories
+              </a>
+
+              <a
+                href="{% url 'adminpanel:delivery_charges' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Delivery Charge Rules
+              </a>
+
+              <a
+                href="{% url 'adminpanel:commission_rules' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Commission Rules
+              </a>
+
+              <a
+                href="{% url 'adminpanel:campaigns' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Campaigns
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= REPORTS DROPDOWN ================= -->
+        <div class="relative" data-dropdown>
+          <button
+            type="button"
+            class="dropdown-button flex items-center gap-1 px-4 py-2 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/5 rounded-lg transition"
+          >
+            Reports
+
+            <svg
+              class="dropdown-icon w-4 h-4 transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m6 9 6 6 6-6"
+              />
+            </svg>
+          </button>
+
+          <!-- Reports Dropdown -->
+          <div
+            class="dropdown-menu absolute left-0 top-[calc(100%-2px)] hidden z-50 pt-2"
+          >
+            <div
+              class="w-60 rounded-xl bg-white border border-gray-200 shadow-xl py-2"
+            >
+              <!-- Revenue Reports -->
+              <a
+                href="{% url 'adminpanel:revenue_reports' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Revenue Reports
+              </a>
+
+              <!-- Monthly Sales -->
+              <a
+                href="{% url 'adminpanel:monthly_sales_reports' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Monthly Sales Reports
+              </a>
+
+              <!-- Order Statistics -->
+              <a
+                href="{% url 'adminpanel:order_statistics' %}"
+                class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#0A192F] transition"
+              >
+                Order Statistics
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PROFILE ================= -->
+        <a
+          href="{% url 'adminpanel:profile' %}"
+          class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/5 rounded-lg transition"
+        >
+          Profile
+        </a>
+      </nav>
+
+      <!-- ================= RIGHT SIDE ================= -->
+      <div class="flex items-center gap-4 shrink-0">
+        <!-- User Avatar -->
+        <div
+          class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#0A192F] font-bold"
+        >
+          {{ request.user.username|first|upper }}
+        </div>
+
+        <!-- Logout -->
+        <a
+          href="{% url 'core:logout' %}"
+          class="text-sm font-medium text-white/80 hover:text-white transition"
+        >
+          Logout
+        </a>
+      </div>
     </div>
-
+  </div>
 </header>
-
-
 
 <!-- ================= ADMIN DROPDOWN JAVASCRIPT ================= -->
 <script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
+  document.addEventListener("DOMContentLoaded", function () {
     const dropdowns = document.querySelectorAll("[data-dropdown]");
 
-
     dropdowns.forEach(function (dropdown) {
+      const button = dropdown.querySelector(".dropdown-button");
+      const menu = dropdown.querySelector(".dropdown-menu");
+      const icon = dropdown.querySelector(".dropdown-icon");
 
-        const button = dropdown.querySelector(".dropdown-button");
-        const menu = dropdown.querySelector(".dropdown-menu");
-        const icon = dropdown.querySelector(".dropdown-icon");
+      button.addEventListener("click", function (event) {
+        event.stopPropagation();
 
+        // Close every other dropdown
+        dropdowns.forEach(function (otherDropdown) {
+          if (otherDropdown !== dropdown) {
+            const otherMenu = otherDropdown.querySelector(".dropdown-menu");
 
-        button.addEventListener("click", function (event) {
+            const otherIcon = otherDropdown.querySelector(".dropdown-icon");
 
-            event.stopPropagation();
+            otherMenu.classList.add("hidden");
 
-
-            // Close every other dropdown
-            dropdowns.forEach(function (otherDropdown) {
-
-                if (otherDropdown !== dropdown) {
-
-                    const otherMenu =
-                        otherDropdown.querySelector(".dropdown-menu");
-
-                    const otherIcon =
-                        otherDropdown.querySelector(".dropdown-icon");
-
-                    otherMenu.classList.add("hidden");
-
-                    otherIcon.classList.remove("rotate-180");
-
-                }
-
-            });
-
-
-            // Toggle current dropdown
-            menu.classList.toggle("hidden");
-
-            icon.classList.toggle("rotate-180");
-
+            otherIcon.classList.remove("rotate-180");
+          }
         });
 
-    });
+        // Toggle current dropdown
+        menu.classList.toggle("hidden");
 
+        icon.classList.toggle("rotate-180");
+      });
+    });
 
     // Close dropdown when clicking outside
     document.addEventListener("click", function () {
+      dropdowns.forEach(function (dropdown) {
+        const menu = dropdown.querySelector(".dropdown-menu");
 
-        dropdowns.forEach(function (dropdown) {
+        const icon = dropdown.querySelector(".dropdown-icon");
 
-            const menu =
-                dropdown.querySelector(".dropdown-menu");
+        menu.classList.add("hidden");
 
-            const icon =
-                dropdown.querySelector(".dropdown-icon");
-
-            menu.classList.add("hidden");
-
-            icon.classList.remove("rotate-180");
-
-        });
-
+        icon.classList.remove("rotate-180");
+      });
     });
-
-});
-
+  });
 </script>
 
-
 {% else %}
-
 
 <!-- ================= CUSTOMER / PUBLIC HEADER ================= -->
 <!-- ================= CUSTOMER / PUBLIC HEADER ================= -->
 <header class="sticky top-0 z-50 bg-[#0A192F] border-b border-white/10">
-    <div class="max-w-[1200px] mx-auto px-4">
-        <div class="h-16 flex items-center justify-between">
-            <a href="{% url 'core:home' %}" class="flex items-center gap-3">
-                <span class="font-serif font-bold text-xl tracking-wide text-white">StitchSync</span>
-            </a>
+  <div class="max-w-[1200px] mx-auto px-4">
+    <div class="h-16 flex items-center justify-between">
+      <a href="{% url 'core:home' %}" class="flex items-center gap-3">
+        <span class="font-serif font-bold text-xl tracking-wide text-white"
+          >StitchSync</span
+        >
+      </a>
 
-            <!-- Guest navigation mapped to core urls -->
-            <nav class="hidden lg:flex items-center gap-1">
-                <a href="{% url 'core:home' %}" class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white">Home</a>
-                <a href="{% url 'core:gallery' %}" class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white">Gallery</a>
-                <a href="{% url 'core:pricing' %}" class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white">Pricing</a>
-                <a href="{% url 'core:contact' %}" class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white">Contact</a>
-            </nav>
+      <!-- Guest navigation mapped to core urls -->
+      <nav class="hidden lg:flex items-center gap-1">
+        <a
+          href="{% url 'core:home' %}"
+          class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white"
+          >Home</a
+        >
+        <a
+          href="{% url 'core:gallery' %}"
+          class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white"
+          >Gallery</a
+        >
+        <a
+          href="{% url 'core:pricing' %}"
+          class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white"
+          >Pricing</a
+        >
+        <a
+          href="{% url 'core:contact' %}"
+          class="px-4 py-2 text-sm font-semibold text-white/90 hover:text-white"
+          >Contact</a
+        >
+      </nav>
 
-            <div class="flex items-center gap-4">
-                <a href="{% url 'core:login' %}" class="text-sm font-medium text-white/80 hover:text-white">Login</a>
-                <a href="{% url 'core:register' %}" class="px-4 py-2 rounded-lg bg-[#D4AF37] text-[#0A192F] text-sm font-bold hover:opacity-90 transition">Register</a>
-            </div>
-        </div>
+      <div class="flex items-center gap-4">
+        <a
+          href="{% url 'core:login' %}"
+          class="text-sm font-medium text-white/80 hover:text-white"
+          >Login</a
+        >
+        <a
+          href="{% url 'core:register' %}"
+          class="px-4 py-2 rounded-lg bg-[#D4AF37] text-[#0A192F] text-sm font-bold hover:opacity-90 transition"
+          >Register</a
+        >
+      </div>
     </div>
+  </div>
 </header>
 {% endif %}

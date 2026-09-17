@@ -1,5 +1,7 @@
 {% extends 'customers/base.html' %}
-{% load static %}
+
+
+ {% comment %} {% load static %}
 
 {% block title %}Place Custom Order | StitchSync{% endblock %}
 
@@ -15,10 +17,10 @@
 
   <form method="POST" id="customOrderForm">
     {% csrf_token %}
-    <div class="grid lg:grid-cols-3 gap-8 items-start">
+    <div class="grid lg:grid-cols-[1fr_320px] gap-8 items-start">
       
       <!-- Left / Main Wizard Area -->
-      <div class="lg:col-span-2 space-y-6">
+      <div class="space-y-6">
         
         <!-- Progress Steps Bar -->
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
@@ -110,7 +112,7 @@
             </label>
           </div>
 
-          <!-- Own Fabric Pickup Details (Hidden by default) -->
+          <!-- Own Fabric Pickup Details -->
           <div id="own-fabric-details" class="hidden space-y-4 pt-2">
             <div class="p-4 rounded-xl border border-blue-100 bg-blue-50/50 text-xs text-blue-900 flex items-start gap-2">
               <span>🚚</span>
@@ -131,24 +133,39 @@
         </div>
 
         <!-- ================= STEP 3: MEASUREMENTS & TRIAL ================= -->
-        <!-- ================= STEP 3: MEASUREMENTS & TRIAL ================= -->
         <div id="wizard-step-3" class="wizard-pane hidden bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
           <div>
             <h3 class="text-navy font-bold text-lg mb-1">Measurement Profile</h3>
             <p class="text-xs text-gray-500 mb-4">Select a saved profile — no manual entry needed. Manage profiles under your Measurements tab.</p>
             
-            <!-- Saved Profile Selector Dropdown / Cards -->
-            <div class="space-y-3">
-              <label class="block text-sm font-medium text-navy">Choose Profile</label>
-              <select name="measurement_profile" class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-navy text-sm" required>
-                <option value="">-- Select a measurement profile --</option>
-                {% for profile in profiles %}
-                  <option value="{{ profile.id }}">{{ profile.name }} ({{ profile.gender }} · {{ profile.category }})</option>
-                {% empty %}
-                  <option value="" disabled>No profiles found! Please add one in your Measurements section first.</option>
-                {% endfor %}
-              </select>
+            <!-- Tab toggles for Self vs Family -->
+            <div class="flex gap-2 mb-4">
+              <button type="button" onclick="filterProfiles('Self')" id="tab-self" class="h-10 px-4 rounded-xl border text-xs font-semibold bg-navy text-white flex items-center gap-2 transition">
+                👤 My Measurement
+              </button>
+              <button type="button" onclick="filterProfiles('Family')" id="tab-family" class="h-10 px-4 rounded-xl border text-xs font-semibold bg-white text-navy border-gray-200 flex items-center gap-2 transition hover:border-navy">
+                👥 Family Member
+              </button>
             </div>
+
+            <!-- Profile Cards Grid -->
+            <div class="grid sm:grid-cols-2 gap-3" id="profile-cards-container">
+              {% for profile in profiles %}
+                <div data-relation="{{ profile.relation }}" class="profile-card border-2 {% if forloop.first %}border-navy bg-navy/5{% else %}border-gray-200{% endif %} rounded-xl p-4 cursor-pointer transition hover:border-navy" onclick="selectProfile('{{ profile.id }}', this)">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-navy text-sm">{{ profile.name }}</span>
+                    {% if profile.is_default %}
+                      <span class="px-2 py-0.5 bg-navy text-gold text-[10px] font-bold rounded-full">DEFAULT</span>
+                    {% endif %}
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">{{ profile.gender }} · {{ profile.category }} · Specs recorded</div>
+                </div>
+              {% empty %}
+                <div class="col-span-full text-xs text-gray-400 p-4">No measurement profiles found. Please add one in your Measurements tab.</div>
+              {% endfor %}
+            </div>
+
+            <input type="hidden" name="measurement_profile" id="selected_profile_id" value="{% if profiles %}{{ profiles.0.id }}{% endif %}" required>
           </div>
 
           <!-- Trial Checkbox -->
@@ -169,52 +186,36 @@
           <div class="flex items-center justify-between pt-4 border-t border-gray-100">
             <button type="button" onclick="switchStep(2)" class="text-sm font-medium text-gray-500 hover:text-navy">Back</button>
             <button type="submit" class="px-8 py-3 bg-navy text-white font-medium rounded-xl hover:bg-slate-800 transition shadow-sm">
-              Proceed to Payment & Order
+              Add to Cart
             </button>
           </div>
         </div>
 
       </div>
 
-      <!-- Right Column: Live Summary Sidebar -->
+      <!-- Right Column: Sticky Live Summary Sidebar (Matches Figma) -->
       <div>
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-6 space-y-4">
-          <div class="flex items-center gap-3 pb-4 border-b border-gray-100">
+          <div class="flex gap-3 pb-4 border-b border-gray-100">
             {% if design.image %}
-              <img src="{{ design.image.url }}" alt="{{ design.title }}" class="w-14 h-14 rounded-xl object-cover border border-gray-200 shrink-0">
+              <img src="{{ design.image.url }}" alt="" class="h-16 w-16 rounded-lg object-cover border border-gray-100">
             {% else %}
-              <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">🧥</div>
+              <div class="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center text-xl">🧥</div>
             {% endif %}
-            <div class="min-w-0">
-              <h4 class="font-bold text-navy text-sm truncate">{{ design.title }}</h4>
-              <p class="text-xs text-gray-500 truncate">{{ design.shop.name|default:"Independent Tailor" }}</p>
+            <div>
+              <div class="text-navy font-bold text-sm">{{ design.title }}</div>
+              <div class="text-xs text-gray-500">{{ design.shop.name|default:"Independent Tailor" }}</div>
             </div>
           </div>
-
-          <div class="space-y-2.5 text-sm text-gray-600">
-            <div class="flex justify-between">
-              <span>Stitching</span>
-              <span class="font-semibold text-navy">${{ design.price }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Fabric Estimate</span>
-              <span class="font-semibold text-navy">$77.00</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Delivery</span>
-              <span class="font-semibold text-navy">$5.00</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Tax</span>
-              <span class="font-semibold text-navy">$4.00</span>
-            </div>
+          <div class="space-y-2 text-sm text-gray-600">
+            <div class="flex justify-between"><span>Stitching</span><span class="font-semibold text-navy">${{ design.price }}</span></div>
+            <div class="flex justify-between"><span>Fabric</span><span class="font-semibold text-navy">$77.00</span></div>
+            <div class="flex justify-between"><span>Delivery</span><span class="font-semibold text-navy">$5.00</span></div>
+            <div class="flex justify-between"><span>Tax</span><span class="font-semibold text-navy">$4.00</span></div>
           </div>
-
-          <hr class="border-gray-100 my-3">
-
-          <div class="flex justify-between items-center text-base font-bold text-navy">
-            <span>Total</span>
-            <span class="text-xl font-serif">${{ total }}</span>
+          <div class="flex justify-between items-center border-t border-gray-100 pt-3">
+            <span class="font-bold text-navy">Total</span>
+            <span class="text-xl font-serif font-bold text-navy">${{ total }}</span>
           </div>
         </div>
       </div>
@@ -223,24 +224,21 @@
   </form>
 </div>
 
-<!-- JavaScript to manage the 3-step Wizard Flow -->
+<!-- Wizard Switching & Profile Interaction Scripts -->
 <script>
-function switchStep(stepNumber) {
-  // Hide all panes
-  document.querySelectorAll('.wizard-pane').forEach(el => el.classList.add('hidden'));
-  // Show target pane
-  document.getElementById('wizard-step-' + stepNumber).classList.remove('hidden');
-
-  // Update indicators
+function switchStep(step) {
+  document.querySelectorAll('.wizard-pane').forEach(p => p.classList.add('hidden'));
+  document.getElementById('wizard-step-' + step).classList.remove('hidden');
+  
   for (let i = 1; i <= 3; i++) {
     const indicator = document.getElementById('step-indicator-' + i);
     const label = document.getElementById('step-label-' + i);
-    if (i === stepNumber) {
+    if (i < step) {
       indicator.className = "w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm transition-all";
+      label.className = "text-xs font-semibold text-navy mt-2";
+    } else if (i === step) {
+      indicator.className = "w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm transition-all ring-4 ring-navy/10";
       label.className = "text-xs font-bold text-navy mt-2";
-    } else if (i < stepNumber) {
-      indicator.className = "w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm transition-all";
-      label.className = "text-xs font-medium text-amber-600 mt-2";
     } else {
       indicator.className = "w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm transition-all";
       label.className = "text-xs font-medium text-gray-400 mt-2";
@@ -260,5 +258,492 @@ function toggleFabricSource(source) {
     details.classList.remove('hidden');
   }
 }
+
+function selectProfile(id, element) {
+  document.getElementById('selected_profile_id').value = id;
+  document.querySelectorAll('.profile-card').forEach(card => {
+    card.classList.remove('border-navy', 'bg-navy/5');
+    card.classList.add('border-gray-200');
+  });
+  element.classList.remove('border-gray-200');
+  element.classList.add('border-navy', 'bg-navy/5');
+}
+
+function filterProfiles(relationType) {
+  const selfBtn = document.getElementById('tab-self');
+  const famBtn = document.getElementById('tab-family');
+  
+  if(relationType === 'Self') {
+    selfBtn.className = "h-10 px-4 rounded-xl border text-xs font-semibold bg-navy text-white flex items-center gap-2 transition";
+    famBtn.className = "h-10 px-4 rounded-xl border text-xs font-semibold bg-white text-navy border-gray-200 flex items-center gap-2 transition hover:border-navy";
+  } else {
+    famBtn.className = "h-10 px-4 rounded-xl border text-xs font-semibold bg-navy text-white flex items-center gap-2 transition";
+    selfBtn.className = "h-10 px-4 rounded-xl border text-xs font-semibold bg-white text-navy border-gray-200 flex items-center gap-2 transition hover:border-navy";
+  }
+
+  document.querySelectorAll('.profile-card').forEach(card => {
+    if(card.getAttribute('data-relation') === relationType) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+</script>
+{% endblock %}   {% endcomment %}
+
+
+
+{% load static %}
+
+{% block title %}Place Custom Order | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-[1320px] mx-auto py-5 px-4">
+  <!-- Page Header -->
+  <div class="mb-4">
+    <h1 class="text-2xl sm:text-3xl font-bold text-navy font-serif">Place Custom Order</h1>
+    <p class="text-gray-500 text-sm mt-1">
+      {{ design.shop.name|default:"Independent Tailor" }} · {{ design.title }}
+    </p>
+  </div>
+
+  <form method="POST" id="customOrderForm">
+    {% csrf_token %}
+    <div class="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
+      
+      <!-- Left / Main Wizard Area -->
+      <div class="space-y-4">
+        
+        <!-- Progress Steps Bar -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div class="flex items-center justify-between relative max-w-lg mx-auto">
+            <div class="absolute left-7 right-7 top-[13px] h-0.5 bg-gray-200 -z-0"></div>
+            
+            <!-- Step Indicators -->
+            <div class="flex flex-col items-center relative z-10 cursor-pointer" onclick="switchStep(1)">
+              <div id="step-indicator-1" class="w-7 h-7 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm transition-all">1</div>
+              <span id="step-label-1" class="text-[11px] font-bold text-navy mt-1.5">Design</span>
+            </div>
+            <div class="flex flex-col items-center relative z-10 cursor-pointer" onclick="switchStep(2)">
+              <div id="step-indicator-2" class="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm transition-all">2</div>
+              <span id="step-label-2" class="text-[11px] font-medium text-gray-400 mt-1.5">Fabric</span>
+            </div>
+            <div class="flex flex-col items-center relative z-10 cursor-pointer" onclick="switchStep(3)">
+              <div id="step-indicator-3" class="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm transition-all">3</div>
+              <span id="step-label-3" class="text-[11px] font-medium text-gray-400 mt-1.5">Measurements</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= STEP 1: DESIGN ================= -->
+        <div id="wizard-step-1" class="wizard-pane bg-white border border-gray-200 border-t-2 border-t-gold rounded-lg p-4 shadow-sm space-y-6">
+          <div class="flex flex-col sm:flex-row gap-4">
+            {% if design.image %}
+              <img src="{{ design.image.url }}" alt="{{ design.title }}" class="w-full sm:w-40 h-48 object-cover rounded-lg border border-gray-200">
+            {% else %}
+              <div class="w-full sm:w-40 h-48 bg-gray-100 rounded-lg flex items-center justify-center text-4xl">🧥</div>
+            {% endif %}
+            <div class="space-y-2">
+              <span class="bg-navy/10 text-navy text-xs font-semibold px-2.5 py-1 rounded-md">{{ design.category }}</span>
+              <h3 class="text-navy text-xl font-bold font-serif">{{ design.title }}</h3>
+              <div class="text-slate text-sm font-medium">{{ design.shop.name|default:"Independent Tailor" }}</div>
+              <div class="flex items-center gap-1 text-amber-500 text-xs">★★★★★ <span class="text-gray-400 ml-1">(4.9)</span></div>
+              <p class="text-slate text-sm pt-2 max-w-sm">
+                {{ design.description|default:"Tailored garment crafted with precision fit. Estimated 6–8 days including an optional fitting trial." }}
+              </p>
+            </div>
+          </div>
+          <div class="flex justify-end pt-3 border-t border-gray-100">
+            <button type="button" onclick="switchStep(2)" class="px-6 py-2.5 bg-navy text-white font-medium rounded-lg hover:bg-slate-800 transition shadow-sm">
+              Continue to Fabric
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= STEP 2: FABRIC ================= -->
+        <div id="wizard-step-2" class="wizard-pane hidden bg-white border border-gray-200 border-t-2 border-t-gold rounded-lg p-4 shadow-sm space-y-6">
+          <div><h3 class="text-navy font-bold text-lg">Fabric Selection</h3><p class="text-xs text-gray-500 mt-1">Choose a fabric from the shop or provide your own.</p></div>
+
+          <!-- Fabric Source Tabs -->
+          <div class="grid sm:grid-cols-2 gap-3">
+            <label class="border-2 border-navy bg-navy/5 p-3 rounded-lg flex items-center gap-3 cursor-pointer transition">
+              <input type="radio" name="fabric_source" value="shop" checked class="accent-navy" onclick="toggleFabricSource('shop')">
+              <div>
+                <span class="font-bold text-navy text-sm block">Shop Fabric</span>
+                <span class="text-xs text-gray-500">Choose from the shop catalog.</span>
+              </div>
+            </label>
+            <label class="border-2 border-gray-200 p-3 rounded-lg flex items-center gap-3 cursor-pointer hover:border-gray-300 transition">
+              <input type="radio" name="fabric_source" value="own" class="accent-navy" onclick="toggleFabricSource('own')">
+              <div>
+                <span class="font-medium text-navy text-sm block">I'll Provide Own Fabric</span>
+                <span class="text-xs text-gray-500">A rider collects it from your address.</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Shop Fabric Swatches -->
+          <div id="shop-swatches" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <label class="fabric-card border-2 border-navy bg-navy/[0.02] ring-1 ring-navy/10 rounded-lg p-2.5 cursor-pointer relative block transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md" data-fabric-name="Egyptian Cotton">
+              <input type="radio" name="selected_fabric" value="Egyptian Cotton" checked class="absolute top-3 right-3 accent-navy" onchange="updateFabricSelection(this)">
+              <div class="fabric-check absolute top-3 left-3 h-5 w-5 rounded-full bg-navy text-white grid place-items-center text-[10px]">✓</div>
+              <div class="h-12 rounded-md bg-[#EAE4D3] mb-2 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Egyptian Cotton</div>
+              <div class="text-xs text-gray-500 mt-0.5">$8/m</div>
+            </label>
+            <label class="fabric-card border-2 border-gray-200 rounded-lg p-3 bg-white cursor-pointer relative block transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/50 hover:shadow-md" data-fabric-name="Italian Wool">
+              <input type="radio" name="selected_fabric" value="Italian Wool" class="absolute top-3 right-3 accent-navy" onchange="updateFabricSelection(this)">
+              <div class="fabric-check hidden absolute top-3 left-3 h-5 w-5 rounded-full bg-navy text-white place-items-center text-[10px]">✓</div>
+              <div class="h-12 rounded-md bg-[#3F444E] mb-2 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Italian Wool</div>
+              <div class="text-xs text-gray-500 mt-0.5">$22/m</div>
+            </label>
+            <label class="fabric-card border-2 border-gray-200 rounded-lg p-3 bg-white cursor-pointer relative block transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/50 hover:shadow-md" data-fabric-name="Pure Silk">
+              <input type="radio" name="selected_fabric" value="Pure Silk" class="absolute top-3 right-3 accent-navy" onchange="updateFabricSelection(this)">
+              <div class="fabric-check hidden absolute top-3 left-3 h-5 w-5 rounded-full bg-navy text-white place-items-center text-[10px]">✓</div>
+              <div class="h-12 rounded-md bg-[#A93C4E] mb-2 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Pure Silk</div>
+              <div class="text-xs text-gray-500 mt-0.5">$18/m</div>
+            </label>
+            <label class="fabric-card border-2 border-gray-200 rounded-lg p-3 bg-white cursor-pointer relative block transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/50 hover:shadow-md" data-fabric-name="Premium Linen">
+              <input type="radio" name="selected_fabric" value="Premium Linen" class="absolute top-3 right-3 accent-navy" onchange="updateFabricSelection(this)">
+              <div class="fabric-check hidden absolute top-3 left-3 h-5 w-5 rounded-full bg-navy text-white place-items-center text-[10px]">✓</div>
+              <div class="h-12 rounded-md bg-[#D8CDB7] mb-2 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Premium Linen</div>
+              <div class="text-xs text-gray-500 mt-0.5">$12/m</div>
+            </label>
+            <label class="fabric-card border-2 border-gray-200 rounded-lg p-3 bg-white cursor-pointer relative block transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/50 hover:shadow-md" data-fabric-name="Cotton Blend">
+              <input type="radio" name="selected_fabric" value="Cotton Blend" class="absolute top-3 right-3 accent-navy" onchange="updateFabricSelection(this)">
+              <div class="fabric-check hidden absolute top-3 left-3 h-5 w-5 rounded-full bg-navy text-white place-items-center text-[10px]">✓</div>
+              <div class="h-12 rounded-md bg-[#B7C3B5] mb-2 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Cotton Blend</div>
+              <div class="text-xs text-gray-500 mt-0.5">$10/m</div>
+            </label>
+            <label class="fabric-card border-2 border-gray-200 rounded-lg p-3 bg-white cursor-pointer relative block transition-all duration-200 hover:-translate-y-0.5 hover:border-navy/50 hover:shadow-md" data-fabric-name="Velvet">
+              <input type="radio" name="selected_fabric" value="Velvet" class="absolute top-3 right-3 accent-navy" onchange="updateFabricSelection(this)">
+              <div class="fabric-check hidden absolute top-3 left-3 h-5 w-5 rounded-full bg-navy text-white place-items-center text-[10px]">✓</div>
+              <div class="h-12 rounded-md bg-[#23304A] mb-2 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Velvet</div>
+              <div class="text-xs text-gray-500 mt-0.5">$20/m</div>
+            </label>
+          </div>
+
+          <!-- Own Fabric Pickup Details -->
+          <div id="own-fabric-details" class="hidden space-y-3">
+            <div class="p-3 rounded-lg border border-blue-100 bg-blue-50/50 text-xs text-blue-900 flex items-start gap-2">
+              <span>🚚</span>
+              <span>A Fabric Pickup Request is created automatically. A rider will collect the fabric from your address and deliver it to the tailor shop.</span>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-navy mb-1">Pickup Address</label>
+              <textarea name="pickup_address" rows="2" placeholder="House, road, area, city" class="w-full rounded-lg border border-gray-200 p-3 text-sm outline-none focus:border-navy"></textarea>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+            <button type="button" onclick="switchStep(1)" class="text-sm font-medium text-gray-500 hover:text-navy">Back</button>
+            <button type="button" onclick="switchStep(3)" class="px-6 py-2.5 bg-navy text-white font-medium rounded-lg hover:bg-slate-800 transition shadow-sm">
+              Continue to Measurements
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= STEP 3: MEASUREMENTS & TRIAL ================= -->
+        <div id="wizard-step-3" class="wizard-pane hidden bg-white border border-gray-200 border-t-2 border-t-gold rounded-lg p-4 shadow-sm space-y-6">
+          <div>
+            <h3 class="text-navy font-bold text-lg mb-1">Measurement Profile</h3>
+            <p class="text-xs text-gray-500 mb-4">Select a saved profile — no manual entry needed. Manage profiles under your Measurements tab.</p>
+            
+            <!-- Tab toggles for Self vs Family -->
+            <div class="flex gap-2 mb-4">
+              <button type="button" onclick="filterProfiles('Self')" id="tab-self" class="h-10 px-4 rounded-lg border text-xs font-semibold bg-navy text-white flex items-center gap-2 transition">
+                👤 My Measurement
+              </button>
+              <button type="button" onclick="filterProfiles('Family')" id="tab-family" class="h-10 px-4 rounded-lg border text-xs font-semibold bg-white text-navy border-gray-200 flex items-center gap-2 transition hover:border-navy">
+                👥 Family Member
+              </button>
+            </div>
+
+            <!-- Profile Cards Grid -->
+            <div class="grid sm:grid-cols-2 gap-3" id="profile-cards-container">
+              {% for profile in profiles %}
+                <div data-relation="{{ profile.relation }}" class="profile-card border-2 {% if forloop.first %}border-navy bg-navy/5{% else %}border-gray-200{% endif %} rounded-lg p-3 cursor-pointer transition hover:border-navy" onclick="selectProfile('{{ profile.id }}', this)">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-navy text-sm">{{ profile.name }}</span>
+                    {% if profile.is_default %}
+                      <span class="px-2 py-0.5 bg-navy text-gold text-[10px] font-bold rounded-full">DEFAULT</span>
+                    {% endif %}
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">{{ profile.gender }} · {{ profile.category }} · Specs recorded</div>
+                </div>
+              {% empty %}
+                <div class="col-span-full text-xs text-gray-400 p-4">No measurement profiles found. Please add one in your Measurements tab.</div>
+              {% endfor %}
+            </div>
+
+            <input type="hidden" name="measurement_profile" id="selected_profile_id" value="{% if profiles %}{{ profiles.0.id }}{% endif %}" required>
+          </div>
+
+          <!-- Trial Checkbox -->
+          <label class="flex items-start gap-3 p-3 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-navy transition-colors">
+            <input type="checkbox" name="trial_requested" class="accent-navy h-5 w-5 mt-0.5">
+            <div>
+              <span class="text-navy font-semibold flex items-center gap-2 text-sm">📅 Request Trial Before Final Delivery</span>
+              <span class="block text-xs text-gray-500 mt-1">The tailor proposes a fitting date; production continues after the trial test fit.</span>
+            </div>
+          </label>
+
+          <!-- Special Instructions -->
+          <div>
+            <label class="block text-sm font-medium text-navy mb-1">Special instructions (optional)</label>
+            <textarea name="instructions" rows="2" placeholder="Any specific style notes for the tailor..." class="w-full rounded-lg border border-gray-200 p-3 text-sm outline-none focus:border-navy"></textarea>
+          </div>
+
+          <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+            <button type="button" onclick="switchStep(2)" class="text-sm font-medium text-gray-500 hover:text-navy">Back</button>
+            <button type="submit" class="px-6 py-2.5 bg-navy text-white font-medium rounded-lg hover:bg-slate-800 transition shadow-sm">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Order Summary -->
+      <aside class="lg:sticky lg:top-4">
+        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+
+          <div class="border-b border-gray-200 px-4 py-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-semibold text-navy">Order Summary</h3>
+                <p class="mt-0.5 text-[11px] text-gray-400">Live overview of your custom order</p>
+              </div>
+              <span class="h-8 w-8 rounded-md bg-gold/15 text-gold grid place-items-center font-serif font-bold">S</span>
+            </div>
+          </div>
+
+          <!-- Product snapshot -->
+          <div class="px-4 py-4">
+            <div class="flex gap-4">
+              {% if design.image %}
+                <img src="{{ design.image.url }}" alt="{{ design.title }}" class="h-20 w-20 shrink-0 rounded-md border border-gray-200 object-cover">
+              {% else %}
+                <div class="h-20 w-20 shrink-0 rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center text-2xl">🧥</div>
+              {% endif %}
+
+              <div class="min-w-0">
+                <div class="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">{{ design.category }}</div>
+                <div class="mt-1 font-serif text-lg font-bold leading-snug text-navy">{{ design.title }}</div>
+                <div class="mt-1 text-xs text-gray-500">{{ design.shop.name|default:"Independent Tailor" }}</div>
+              </div>
+            </div>
+
+            <!-- Live selections -->
+            <div class="mt-4 grid grid-cols-2 gap-2">
+              <div class="rounded-md bg-gray-50 px-3 py-2.5">
+                <div class="text-[9px] font-semibold uppercase tracking-wider text-gray-400">Fabric</div>
+                <div id="summary-fabric-name" class="mt-0.5 truncate text-xs font-semibold text-navy">Egyptian Cotton</div>
+              </div>
+              <div class="rounded-md bg-gray-50 px-3 py-2.5">
+                <div class="text-[9px] font-semibold uppercase tracking-wider text-gray-400">Profile</div>
+                <div class="mt-0.5 truncate text-xs font-semibold text-navy">Selected at Step 3</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cost breakdown -->
+          <div class="border-t border-gray-100 px-4 py-3">
+            <div class="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400">Price Details</div>
+            <div class="space-y-2 text-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-500">Stitching</span>
+                <span class="font-semibold text-navy">${{ design.price }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-500">Fabric</span>
+                <span class="font-semibold text-navy">$77.00</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-500">Fitting Trial</span>
+                <span id="trial-price" class="font-semibold text-navy">$0.00</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-500">Delivery</span>
+                <span class="font-semibold text-navy">$4.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div class="border-t border-gray-200 bg-navy px-4 py-3 text-white">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">Estimated Total</div>
+                <div class="mt-1 text-[11px] text-white/55">Includes delivery & tax</div>
+              </div>
+              <div class="font-serif text-2xl font-bold text-gold">${{ total }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-2 flex items-center gap-2 px-1 text-[11px] text-gray-400">
+          <span class="h-1.5 w-1.5 rounded-full bg-gold"></span>
+          Selections update as you customize your order.
+        </div>
+      </aside>
+
+    </div>
+  </form>
+</div>
+
+<!-- Wizard Switching & Profile Interaction Scripts -->
+<script>
+function switchStep(step) {
+  document.querySelectorAll('.wizard-pane').forEach(p => p.classList.add('hidden'));
+  const targetPane = document.getElementById('wizard-step-' + step);
+  if (targetPane) {
+    targetPane.classList.remove('hidden');
+  }
+  
+  for (let i = 1; i <= 3; i++) {
+    const indicator = document.getElementById('step-indicator-' + i);
+    const label = document.getElementById('step-label-' + i);
+    if (!indicator || !label) continue;
+
+    if (i < step) {
+      indicator.className = "w-7 h-7 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm transition-all";
+      label.className = "text-[11px] font-semibold text-navy mt-1.5";
+    } else if (i === step) {
+      indicator.className = "w-7 h-7 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm transition-all ring-4 ring-navy/10";
+      label.className = "text-[11px] font-bold text-navy mt-1.5";
+    } else {
+      indicator.className = "w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm transition-all";
+      label.className = "text-[11px] font-medium text-gray-400 mt-1.5";
+    }
+  }
+
+  const form = document.getElementById('customOrderForm');
+  if (form) {
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function toggleFabricSource(source) {
+  const swatches = document.getElementById('shop-swatches');
+  const details = document.getElementById('own-fabric-details');
+  if (source === 'shop') {
+    if (swatches) swatches.classList.remove('hidden');
+    if (details) details.classList.add('hidden');
+  } else {
+    if (swatches) swatches.classList.add('hidden');
+    if (details) details.classList.remove('hidden');
+  }
+  updateLiveTotal();
+}
+
+function updateFabricSelection(input) {
+  document.querySelectorAll('.fabric-card').forEach(card => {
+    card.classList.remove('border-navy', 'bg-navy/[0.02]', 'ring-1', 'ring-navy/10');
+    card.classList.add('border-gray-200', 'bg-white');
+    const check = card.querySelector('.fabric-check');
+    if (check) {
+      check.classList.add('hidden');
+      check.classList.remove('grid');
+    }
+  });
+
+  const selectedCard = input.closest('.fabric-card');
+  if (selectedCard) {
+    selectedCard.classList.remove('border-gray-200', 'bg-white');
+    selectedCard.classList.add('border-navy', 'bg-navy/[0.02]', 'ring-1', 'ring-navy/10');
+    const check = selectedCard.querySelector('.fabric-check');
+    if (check) {
+      check.classList.remove('hidden');
+      check.classList.add('grid');
+    }
+  }
+
+  const summaryName = document.getElementById('summary-fabric-name');
+  if (summaryName) summaryName.textContent = input.value;
+}
+
+function selectProfile(id, element) {
+  const profileInput = document.getElementById('selected_profile_id');
+  if (profileInput) profileInput.value = id;
+
+  document.querySelectorAll('.profile-card').forEach(card => {
+    card.classList.remove('border-navy', 'bg-navy/5');
+    card.classList.add('border-gray-200');
+  });
+  element.classList.remove('border-gray-200');
+  element.classList.add('border-navy', 'bg-navy/5');
+}
+
+function filterProfiles(relationType) {
+  const selfBtn = document.getElementById('tab-self');
+  const famBtn = document.getElementById('tab-family');
+  
+  if(selfBtn && famBtn) {
+    if(relationType === 'Self') {
+      selfBtn.className = "h-10 px-4 rounded-lg border text-xs font-semibold bg-navy text-white flex items-center gap-2 transition";
+      famBtn.className = "h-10 px-4 rounded-lg border text-xs font-semibold bg-white text-navy border-gray-200 flex items-center gap-2 transition hover:border-navy";
+    } else {
+      famBtn.className = "h-10 px-4 rounded-lg border text-xs font-semibold bg-navy text-white flex items-center gap-2 transition";
+      selfBtn.className = "h-10 px-4 rounded-lg border text-xs font-semibold bg-white text-navy border-gray-200 flex items-center gap-2 transition hover:border-navy";
+    }
+  }
+
+  document.querySelectorAll('.profile-card').forEach(card => {
+    if(card.getAttribute('data-relation') === relationType) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function updateLiveTotal() {
+  const basePrice = parseFloat("{{ design.price }}") || 0;
+  const fabricSourceInput = document.querySelector('input[name="fabric_source"]:checked');
+  const fabricSource = fabricSourceInput ? fabricSourceInput.value : 'shop';
+  const trialCheckbox = document.querySelector('input[name="trial_requested"]');
+  const trialChecked = trialCheckbox ? trialCheckbox.checked : false;
+
+  let fabricCost = (fabricSource === 'shop') ? 77.00 : 0.00;
+  let pickupFee = (fabricSource === 'own') ? 3.00 : 0.00;
+  let trialFee = trialChecked ? 5.00 : 0.00;
+  let deliveryFee = 4.00;
+
+  // Update individual trial row text dynamically
+  const trialPriceEl = document.getElementById('trial-price');
+  if (trialPriceEl) {
+    trialPriceEl.textContent = '$' + trialFee.toFixed(2);
+  }
+
+  let calculatedTotal = basePrice + fabricCost + pickupFee + trialFee + deliveryFee;
+
+  const totalElement = document.querySelector('.font-serif.text-2xl.font-bold.text-gold');
+  if (totalElement) {
+    totalElement.textContent = '$' + calculatedTotal.toFixed(2);
+  }
+}
+
+// Attach event listeners on load
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input[name="fabric_source"], input[name="trial_requested"]').forEach(input => {
+    input.addEventListener('change', updateLiveTotal);
+  });
+});
 </script>
 {% endblock %}
+
+
+
+
+
+
+
+
+

@@ -1,64 +1,258 @@
-{% extends 'customers/base.html' %}
-{% load static %}
+{% extends 'customers/base.html' %} 
+
+{% comment %} {% load static %}
 
 {% block title %}Shopping Cart | StitchSync{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <h1 class="text-3xl font-bold text-navy font-serif">Your Cart</h1>
-    <p class="text-gray-500 text-sm mt-1">Review your custom tailoring items before checkout.</p>
-</div>
+<div class="max-w-[1200px] mx-auto py-8 px-4">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-navy font-serif">Your Cart</h1>
+        <p class="text-gray-500 text-sm mt-1">Review your custom tailoring items before final payment checkout.</p>
+    </div>
 
-{% if cart_items %}
-<form method="POST" action="{% url 'customers:checkout' %}">
-    {% csrf_token %}
-    <div class="grid lg:grid-cols-3 gap-8">
+    {% if cart_items %}
+    <div class="grid lg:grid-cols-3 gap-8 items-start">
         <!-- Cart Items List -->
         <div class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
             <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Cart Items ({{ cart_items|length }})</h3>
             
             {% for item in cart_items %}
-            <div class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
-                {% if item.image_url %}
-                    <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="w-20 h-20 object-cover rounded-xl border border-gray-200">
-                {% else %}
-                    <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Default Design" class="w-20 h-20 object-cover rounded-xl border border-gray-200">
-                {% endif %}
-                
-                <div class="flex-1">
-                    <h4 class="font-bold text-navy">{{ item.product_name }}</h4>
-                    <p class="text-xs text-gray-500 mt-1">Shop: {{ item.shop_name }} · Quantity: {{ item.quantity }}</p>
-                    <div class="font-bold text-navy mt-2">${{ item.price }}</div>
+            <div class="flex items-center justify-between gap-4 py-4 border-b border-gray-100 last:border-0">
+                <div class="flex items-center gap-4">
+                    {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="w-20 h-20 object-cover rounded-xl border border-gray-200">
+                    {% else %}
+                        <div class="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center text-2xl">🧥</div>
+                    {% endif %}
+                    
+                    <div>
+                        <h4 class="font-bold text-navy">{{ item.product_name }}</h4>
+                        <p class="text-xs text-gray-500 mt-0.5">Shop: {{ item.shop_name }} · Qty: {{ item.quantity }}</p>
+                        <p class="text-xs text-gray-400 mt-1">Fabric: {{ item.fabric_source|title }} | Profile: {{ item.measurement_profile.name|default:"Default" }}</p>
+                        <div class="font-bold text-navy mt-1">${{ item.price }}</div>
+                    </div>
                 </div>
+
+                <!-- Remove Item Button -->
+                <a href="{% url 'customers:remove_from_cart' item.id %}" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition" title="Remove item">
+                    🗑️
+                </a>
             </div>
             {% endfor %}
         </div>
 
         <!-- Order Summary Sidebar -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm h-fit sticky top-6">
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-6">
             <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Order Summary</h3>
             <div class="flex justify-between text-sm text-gray-600 mb-3">
                 <span>Subtotal</span>
                 <span class="font-bold text-navy">${{ total }}</span>
             </div>
             <div class="flex justify-between text-sm text-gray-600 mb-4">
-                <span>Pickup & Delivery</span>
-                <span class="font-bold text-navy">$5.00</span>
+                <span>Delivery & Tax</span>
+                <span class="font-bold text-navy">$9.00</span>
             </div>
             <hr class="border-gray-200 my-4">
             <div class="flex justify-between text-base font-bold text-navy mb-6">
                 <span>Total</span>
-                <span>${{ total|add:5.00 }}</span>
+                <span class="text-xl font-serif">${{ total|add:9.00 }}</span>
             </div>
-            <button type="submit" class="block w-full py-3 bg-navy text-white text-center rounded-xl font-medium hover:bg-slate-800 transition shadow-sm">Proceed to Checkout</button>
+            <a href="{% url 'customers:payment' %}" class="block w-full py-3 bg-navy text-white text-center rounded-xl font-medium hover:bg-slate-800 transition shadow-sm">
+                Proceed to Checkout
+            </a>
         </div>
     </div>
-</form>
-{% else %}
-<div class="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
-    <h3 class="text-navy font-bold text-lg mb-2">Your cart is empty</h3>
-    <p class="text-gray-500 text-sm mb-6">Explore our marketplace gallery and add some custom designs to your cart.</p>
-    <a href="{% url 'core:marketplace' %}" class="inline-block py-3 px-6 bg-navy text-white rounded-xl font-medium hover:bg-slate-800 transition">Browse Marketplace</a>
+    {% else %}
+    <div class="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
+        <h3 class="text-navy font-bold text-lg mb-2">Your cart is empty</h3>
+        <p class="text-gray-500 text-sm mb-6">Explore our marketplace gallery and configure a custom design.</p>
+        <a href="{% url 'core:marketplace' %}" class="inline-block py-3 px-6 bg-navy text-white rounded-xl font-medium hover:bg-slate-800 transition">Browse Marketplace</a>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
+{% endblock %} {% endcomment %}
+
+
+
+
+
+
+
+
+{% comment %} 
+{% extends 'customers/base.html' %} {% endcomment %}
+
+
+
+
+
+
+ {% load static %}
+
+{% block title %}Shopping Cart | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto py-8 px-4">
+
+    <!-- Page Header -->
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <div class="flex items-center gap-2 text-gold text-[11px] font-semibold uppercase tracking-[0.18em] mb-2">
+                <span class="h-px w-6 bg-gold"></span>
+                Shopping Cart
+            </div>
+            <h1 class="text-3xl font-bold text-navy font-serif">Your Cart</h1>
+            <p class="text-gray-500 text-sm mt-1">Review your custom tailoring items before final payment checkout.</p>
+        </div>
+
+        {% if cart_items %}
+        <div class="text-xs text-gray-500">
+            <span class="font-semibold text-navy">{{ cart_items|length }}</span>
+            item{{ cart_items|length|pluralize }} in cart
+        </div>
+        {% endif %}
+    </div>
+
+    {% if cart_items %}
+    <div class="grid lg:grid-cols-[1fr_340px] gap-6 items-start">
+
+        <!-- Cart Items -->
+        <section class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+
+            <!-- Section Header -->
+            <div class="flex items-center justify-between border-b border-gray-100 bg-gray-50/70 px-6 py-4">
+                <div>
+                    <h3 class="text-navy font-semibold text-base">Cart Items</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Configured garments ready for checkout.</p>
+                </div>
+
+                <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-navy px-2 text-[11px] font-bold text-gold">
+                    {{ cart_items|length }}
+                </span>
+            </div>
+
+            <!-- Items List -->
+            <div class="divide-y divide-gray-100">
+                {% for item in cart_items %}
+                <div class="p-5 sm:p-6">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                        <!-- Product -->
+                        <div class="flex min-w-0 items-center gap-4">
+                            {% if item.image_url %}
+                                <img src="{{ item.image_url }}"
+                                     alt="{{ item.product_name }}"
+                                     class="h-20 w-20 shrink-0 rounded-xl border border-gray-200 object-cover">
+                            {% else %}
+                                <div class="grid h-20 w-20 shrink-0 place-items-center rounded-xl border border-gray-200 bg-gray-50 text-navy">
+                                    <i data-lucide="shirt" class="h-7 w-7"></i>
+                                </div>
+                            {% endif %}
+
+                            <div class="min-w-0">
+                                <h4 class="truncate font-serif text-lg font-bold text-navy">{{ item.product_name }}</h4>
+                                <p class="mt-1 text-xs text-gray-500">
+                                    {{ item.shop_name }} · Qty {{ item.quantity }}
+                                </p>
+
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <span class="rounded-lg bg-gray-50 px-2.5 py-1 text-[11px] text-gray-600 border border-gray-100">
+                                        Fabric: <span class="font-semibold text-navy">{{ item.fabric_source|title }}</span>
+                                    </span>
+
+                                    <span class="rounded-lg bg-gray-50 px-2.5 py-1 text-[11px] text-gray-600 border border-gray-100">
+                                        Profile: <span class="font-semibold text-navy">{{ item.measurement_profile.name|default:"Default" }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price + Remove -->
+                        <div class="flex items-center justify-between gap-4 border-t border-gray-100 pt-4 sm:border-t-0 sm:pt-0">
+                            <div class="sm:text-right">
+                                <span class="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Price</span>
+                                <span class="font-serif text-xl font-bold text-navy">${{ item.price }}</span>
+                            </div>
+
+                            <a href="{% url 'customers:remove_from_cart' item.id %}"
+                               class="grid h-9 w-9 place-items-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50 hover:text-red-600"
+                               title="Remove item"
+                               aria-label="Remove {{ item.product_name }} from cart">
+                                <i data-lucide="trash-2" class="h-4 w-4"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Order Summary -->
+        <!-- Order Summary -->
+        <aside class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm lg:sticky lg:top-24">
+
+            <!-- Gold accent -->
+            <div class="h-1 bg-gold"></div>
+
+            <div class="p-6">
+                <h3 class="font-serif text-lg font-bold text-navy">Order Summary</h3>
+                <p class="mt-1 text-xs text-gray-400">Final total before payment.</p>
+
+                <div class="mt-5 space-y-3 text-sm">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Subtotal &amp; Fees</span>
+                        <span class="font-semibold text-navy">${{ total }}</span>
+                    </div>
+                </div>
+
+                <div class="my-5 border-t border-gray-100"></div>
+
+                <div class="flex items-end justify-between">
+                    <div>
+                        <span class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400">Total</span>
+                        <span class="text-xs text-gray-400">Amount due at checkout</span>
+                    </div>
+                    <!-- Display {{ total }} directly without adding extra filter math like |add:9.00 -->
+                    <span class="font-serif text-2xl font-bold text-navy">${{ total }}</span>
+                </div>
+
+                <a href="{% url 'customers:payment' %}"
+                   class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-navy py-3 text-sm font-semibold text-white transition hover:bg-slate-800 shadow-sm">
+                    Proceed to Checkout
+                    <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                </a>
+
+                <div class="mt-4 flex items-center justify-center gap-2 text-[11px] text-gray-400">
+                    <i data-lucide="shield-check" class="h-3.5 w-3.5 text-gold"></i>
+                    Secure checkout with StitchSync
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    {% else %}
+
+    <!-- Empty Cart -->
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div class="h-1 bg-gold"></div>
+        <div class="px-6 py-14 text-center">
+            <div class="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-navy text-gold">
+                <i data-lucide="shopping-bag" class="h-6 w-6"></i>
+            </div>
+
+            <h3 class="mt-5 font-serif text-xl font-bold text-navy">Your cart is empty</h3>
+            <p class="mx-auto mt-2 max-w-md text-sm text-gray-500">
+                Explore our marketplace gallery and configure a custom design.
+            </p>
+
+            <a href="{% url 'core:marketplace' %}"
+               class="mt-6 inline-flex items-center gap-2 rounded-xl bg-navy px-6 py-3 text-sm font-medium text-white transition hover:bg-slate-800">
+                Browse Marketplace
+                <i data-lucide="arrow-right" class="h-4 w-4"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

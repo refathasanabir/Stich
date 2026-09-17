@@ -48,18 +48,28 @@ class DesignCustomizationOption(models.Model):
 
 
 class CartItem(models.Model):
-    """Tracks items added to a customer's shopping cart before checkout"""
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product_name = models.CharField(max_length=150)
     shop_name = models.CharField(max_length=150)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+
+    # Granular price storage to prevent recalculation drift
+    base_price = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    fabric_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    trial_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    delivery_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    price = models.DecimalField(max_digits=8, decimal_places=2)  # Total item price
+
     quantity = models.PositiveIntegerField(default=1)
     image_url = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.quantity} x {self.product_name} ({self.user.username})"
+    fabric_source = models.CharField(max_length=10, default="shop")
+    pickup_address = models.TextField(blank=True, null=True)
+    trial_requested = models.BooleanField(default=False)
+    measurement_profile = models.ForeignKey(
+        MeasurementProfile, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Order(models.Model):
@@ -127,6 +137,31 @@ class Order(models.Model):
         MeasurementProfile, on_delete=models.SET_NULL, null=True, blank=True
     )
     profile_name_snapshot = models.CharField(max_length=100, blank=True, null=True)
+    delivery_pin = models.CharField(max_length=4, blank=True, null=True)
 
     def __str__(self):
         return f"{self.order_id} - {self.product_name}"
+
+
+class CartItem(models.Model):
+    """Tracks custom items added to a customer's shopping cart before checkout"""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=150)
+    shop_name = models.CharField(max_length=150)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
+    image_url = models.URLField(blank=True, null=True)
+
+    # Custom 3-phase wizard selections stored per item in cart
+    fabric_source = models.CharField(max_length=10, default="shop")
+    pickup_address = models.TextField(blank=True, null=True)
+    trial_requested = models.BooleanField(default=False)
+    measurement_profile = models.ForeignKey(
+        MeasurementProfile, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product_name} ({self.user.username})"

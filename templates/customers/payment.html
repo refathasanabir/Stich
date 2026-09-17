@@ -1,0 +1,252 @@
+{% extends 'customers/base.html' %}
+
+
+{% comment %} {% load static %}
+
+{% block title %}Checkout | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto py-8 px-4">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-navy font-serif">Checkout</h1>
+    <p class="text-gray-500 text-sm mt-1">Review and pay for your custom order.</p>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="grid md:grid-cols-[1fr_360px] gap-8 items-start">
+      
+      <!-- Left Column: Payment Methods -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+        <h3 class="text-navy font-bold text-lg mb-2">Payment Method</h3>
+        
+        <div class="space-y-3">
+          <label class="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-navy bg-navy/5 cursor-pointer transition">
+            <input type="radio" name="payment_method" value="card" checked class="accent-navy">
+            <span class="text-charcoal font-medium text-sm">Credit / Debit Card</span>
+          </label>
+          <label class="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition">
+            <input type="radio" name="payment_method" value="mobile" class="accent-navy">
+            <span class="text-charcoal font-medium text-sm">Mobile Money</span>
+          </label>
+          <label class="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-gray-300 transition">
+            <input type="radio" name="payment_method" value="cod" class="accent-navy">
+            <span class="text-charcoal font-medium text-sm">Cash on Delivery</span>
+          </label>
+        </div>
+
+        <div class="mt-6 space-y-4 pt-4 border-t border-gray-100">
+          <div>
+            <label class="block text-sm font-medium text-charcoal mb-1.5">Card Number</label>
+            <input type="text" placeholder="4242 4242 4242 4242" class="w-full h-11 rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-navy">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-charcoal mb-1.5">Expiry</label>
+              <input type="text" placeholder="MM/YY" class="w-full h-11 rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-navy">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-charcoal mb-1.5">CVC</label>
+              <input type="text" placeholder="123" class="w-full h-11 rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-navy">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Order Summary Sidebar -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-6 space-y-4">
+        <h3 class="text-navy font-bold text-base border-b border-gray-100 pb-3">Order Summary</h3>
+        
+        <div class="space-y-2 text-sm max-h-48 overflow-y-auto">
+          {% for item in cart_items %}
+          <div class="flex justify-between text-gray-600">
+            <span class="truncate pr-2">{{ item.quantity }}x {{ item.product_name }}</span>
+            <span class="font-semibold text-charcoal shrink-0">${{ item.price }}</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <hr class="border-gray-100">
+
+        <div class="flex justify-between items-center pt-1">
+          <span class="font-bold text-navy">Total</span>
+          <span class="text-xl font-serif font-bold text-navy">${{ total }}</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-navy text-white font-medium rounded-xl hover:bg-slate-800 transition shadow-sm text-center mt-2">
+          Place Custom Order
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %} {% endcomment %}
+
+
+
+
+
+
+
+{% load static %}
+
+{% block title %}Checkout | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto py-8 px-4">
+
+  <!-- Page Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-navy font-serif">Checkout</h1>
+    <p class="text-gray-500 text-sm mt-1">Review and pay for your custom order.</p>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <div class="grid md:grid-cols-[1fr_340px] gap-6 items-start">
+
+      <!-- Payment Method -->
+      <section class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+
+        <!-- Section Header -->
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+          <h3 class="text-navy font-bold text-base">Payment Method</h3>
+          <p class="text-xs text-gray-500 mt-1">Choose how you would like to pay.</p>
+        </div>
+
+        <div class="p-6">
+          <div class="space-y-3">
+
+            <!-- Card -->
+            <label class="flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-navy bg-navy/5 cursor-pointer transition">
+              <div class="flex items-center gap-3">
+                <input type="radio" name="payment_method" value="card" checked class="accent-navy h-4 w-4">
+                <div>
+                  <div class="text-sm font-semibold text-navy">Credit / Debit Card</div>
+                  <div class="text-xs text-gray-400 mt-0.5">Pay securely using your card</div>
+                </div>
+              </div>
+              <span class="text-gold text-lg">●</span>
+            </label>
+
+            <!-- Mobile Money -->
+            <label class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-navy/40 transition bg-white">
+              <input type="radio" name="payment_method" value="mobile" class="accent-navy h-4 w-4">
+              <div>
+                <div class="text-sm font-semibold text-navy">Mobile Money</div>
+                <div class="text-xs text-gray-400 mt-0.5">Pay using your mobile wallet</div>
+              </div>
+            </label>
+
+            <!-- COD -->
+            <label class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-navy/40 transition bg-white">
+              <input type="radio" name="payment_method" value="cod" class="accent-navy h-4 w-4">
+              <div>
+                <div class="text-sm font-semibold text-navy">Cash on Delivery</div>
+                <div class="text-xs text-gray-400 mt-0.5">Pay when your order arrives</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Card Details -->
+          <div class="mt-6 pt-6 border-t border-gray-100">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="h-2 w-2 rounded-full bg-gold"></span>
+              <h4 class="text-sm font-semibold text-navy">Card Details</h4>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-charcoal mb-1.5">Card Number</label>
+                <input
+                  type="text"
+                  placeholder="4242 4242 4242 4242"
+                  class="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-navy focus:ring-2 focus:ring-navy/5">
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-charcoal mb-1.5">Expiry</label>
+                  <input
+                    type="text"
+                    placeholder="MM/YY"
+                    class="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-navy focus:ring-2 focus:ring-navy/5">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-charcoal mb-1.5">CVC</label>
+                  <input
+                    type="text"
+                    placeholder="123"
+                    class="w-full h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-navy focus:ring-2 focus:ring-navy/5">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Order Summary -->
+      <aside class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden sticky top-6">
+
+        <!-- Gold Accent -->
+        <div class="h-1 bg-gold"></div>
+
+        <div class="p-6">
+          <div class="pb-4 border-b border-gray-100">
+            <h3 class="text-navy font-bold text-base">Order Summary</h3>
+            <p class="text-xs text-gray-500 mt-1">Items included in this checkout.</p>
+          </div>
+
+          <!-- Items -->
+          <div class="py-4 space-y-3 max-h-52 overflow-y-auto">
+            {% for item in cart_items %}
+            <div class="flex justify-between gap-4 text-sm">
+              <div class="min-w-0">
+                <p class="text-gray-700 font-medium truncate">{{ item.product_name }}</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Qty {{ item.quantity }}</p>
+              </div>
+              <span class="font-semibold text-navy shrink-0">${{ item.price }}</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Subtotal & Delivery Breakdown -->
+          <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
+            <div class="flex justify-between text-gray-500">
+              <span>Subtotal</span>
+              <span class="font-semibold text-navy">${{ subtotal }}</span>
+            </div>
+            <div class="flex justify-between text-gray-500">
+              <span>Delivery &amp; Tax</span>
+              <span class="font-semibold text-navy">${{ delivery_fee }}</span>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div class="border-t border-gray-100 pt-4 mt-2">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold text-navy">Total</span>
+              <span class="text-2xl font-serif font-bold text-navy">${{ total }}</span>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            class="w-full mt-5 py-3 bg-navy text-white font-medium rounded-xl hover:bg-slate-800 transition shadow-sm text-center">
+            Place Custom Order
+          </button>
+
+          <p class="text-[11px] text-gray-400 text-center mt-3 leading-5">
+            By placing your order, you confirm the details above are correct.
+          </p>
+        </div>
+      </aside>
+
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'customers/base.html' %}
+{% load static %}
+
+{% block title %}Cart Checkout | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto py-8 px-4">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-navy font-serif">Complete Cart Checkout</h1>
+    <p class="text-gray-500 text-sm mt-1">Configure fabric options and select your measurement profile for your cart items.</p>
+  </div>
+
+  <form method="POST" id="cartCheckoutForm">
+    {% csrf_token %}
+    <div class="grid lg:grid-cols-3 gap-8 items-start">
+      
+      <!-- Left Column: Options Area -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Step 1: Fabric Selection -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+          <h3 class="text-navy font-bold text-lg">Fabric Selection</h3>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="border-2 border-navy bg-navy/5 p-4 rounded-xl flex items-center gap-3 cursor-pointer transition">
+              <input type="radio" name="fabric_source" value="shop" checked class="accent-navy" onclick="toggleFabricSource('shop')">
+              <div>
+                <span class="font-bold text-navy text-sm block">Shop Fabric</span>
+                <span class="text-xs text-gray-500">Choose from the shop catalog.</span>
+              </div>
+            </label>
+            <label class="border-2 border-gray-200 p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:border-gray-300 transition">
+              <input type="radio" name="fabric_source" value="own" class="accent-navy" onclick="toggleFabricSource('own')">
+              <div>
+                <span class="font-medium text-navy text-sm block">I'll Provide Own Fabric</span>
+                <span class="text-xs text-gray-500">A rider collects it from your address.</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Shop Fabric Catalog View -->
+          <div id="shop-swatches" class="grid sm:grid-cols-3 gap-4 pt-2">
+            <label class="border-2 border-navy rounded-xl p-3 bg-white cursor-pointer relative block transition hover:shadow-md">
+              <input type="radio" name="selected_fabric" value="Egyptian Cotton" checked class="absolute top-3 right-3 accent-navy">
+              <div class="h-16 rounded-lg bg-[#EAE4D3] mb-3 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Egyptian Cotton</div>
+              <div class="text-xs text-gray-500 mt-0.5">$8/m</div>
+            </label>
+            <label class="border-2 border-gray-200 rounded-xl p-3 bg-white cursor-pointer relative block transition hover:border-navy">
+              <input type="radio" name="selected_fabric" value="Italian Wool" class="absolute top-3 right-3 accent-navy">
+              <div class="h-16 rounded-lg bg-[#3F444E] mb-3 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Italian Wool</div>
+              <div class="text-xs text-gray-500 mt-0.5">$22/m</div>
+            </label>
+            <label class="border-2 border-gray-200 rounded-xl p-3 bg-white cursor-pointer relative block transition hover:border-navy">
+              <input type="radio" name="selected_fabric" value="Pure Silk" class="absolute top-3 right-3 accent-navy">
+              <div class="h-16 rounded-lg bg-[#A93C4E] mb-3 border border-gray-100"></div>
+              <div class="font-semibold text-navy text-sm">Pure Silk</div>
+              <div class="text-xs text-gray-500 mt-0.5">$18/m</div>
+            </label>
+          </div>
+
+          <!-- Own Fabric Pickup Details -->
+          <div id="own-fabric-details" class="hidden space-y-4 pt-2">
+            <div class="p-4 rounded-xl border border-blue-100 bg-blue-50/50 text-xs text-blue-900 flex items-start gap-2">
+              <span>🚚</span>
+              <span>A Fabric Pickup Request is created automatically. A rider will collect the fabric from your address.</span>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-navy mb-1">Pickup Address</label>
+              <textarea name="pickup_address" rows="2" placeholder="House, road, area, city" class="w-full rounded-xl border border-gray-200 p-3 text-sm outline-none focus:border-navy"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Measurement Profile Selection -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+          <div>
+            <h3 class="text-navy font-bold text-lg mb-1">Measurement Profile</h3>
+            <p class="text-xs text-gray-500 mb-4">Select a saved profile for your cart items. Manage profiles under your Measurements tab.</p>
+            
+            <div class="space-y-3">
+              <label class="block text-sm font-medium text-navy">Choose Profile</label>
+              <select name="measurement_profile" class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-navy text-sm" required>
+                <option value="">-- Select a measurement profile --</option>
+                {% for profile in profiles %}
+                  <option value="{{ profile.id }}">{{ profile.name }} ({{ profile.gender }} · {{ profile.category }})</option>
+                {% empty %}
+                  <option value="" disabled>No profiles found! Please add one in your Measurements section first.</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Trial Checkbox -->
+          <label class="flex items-start gap-3 p-4 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-navy transition-colors">
+            <input type="checkbox" name="trial_requested" class="accent-navy h-5 w-5 mt-0.5">
+            <div>
+              <span class="text-navy font-semibold flex items-center gap-2 text-sm">📅 Request Trial Before Final Delivery</span>
+              <span class="block text-xs text-gray-500 mt-1">The tailor proposes a fitting date; production continues after the trial test fit.</span>
+            </div>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Cart Summary Sidebar -->
+      <div>
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-6 space-y-4">
+          <h3 class="font-bold text-navy text-base pb-3 border-b border-gray-100">Cart Items Summary</h3>
+
+          <div class="space-y-3 max-h-56 overflow-y-auto pr-1">
+            {% for item in cart_items %}
+              <div class="flex items-center justify-between text-sm">
+                <div class="truncate pr-2">
+                  <span class="font-semibold text-navy">{{ item.quantity }}x</span> {{ item.product_name }}
+                </div>
+                <span class="font-semibold text-navy shrink-0">${% widthratio item.price 1 item.quantity %}</span>
+              </div>
+            {% endfor %}
+          </div>
+
+          <hr class="border-gray-100 my-2">
+
+          <div class="space-y-2 text-sm text-gray-600">
+            <div class="flex justify-between">
+              <span>Fabric Estimate</span>
+              <span class="font-semibold text-navy">$77.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Delivery</span>
+              <span class="font-semibold text-navy">$5.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Tax</span>
+              <span class="font-semibold text-navy">$4.00</span>
+            </div>
+          </div>
+
+          <hr class="border-gray-100 my-2">
+
+          <div class="flex justify-between items-center text-base font-bold text-navy">
+            <span>Total</span>
+            <span class="text-xl font-serif">${{ total }}</span>
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-navy text-white font-medium rounded-xl hover:bg-slate-800 transition shadow-sm text-center">
+            Proceed to Place Order
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<!-- JavaScript to toggle fabric source -->
+<script>
+function toggleFabricSource(source) {
+  const swatches = document.getElementById('shop-swatches');
+  const details = document.getElementById('own-fabric-details');
+  if (source === 'shop') {
+    swatches.classList.remove('hidden');
+    details.classList.add('hidden');
+  } else {
+    swatches.classList.add('hidden');
+    details.classList.remove('hidden');
+  }
+}
+</script>
+{% endblock %}
