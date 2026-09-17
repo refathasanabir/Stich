@@ -1,0 +1,285 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Campaigns | StitchSync Admin{% endblock %}
+
+{% block content %}
+
+<section class="max-w-[1200px] mx-auto px-4 py-8">
+
+    <div class="mb-6">
+
+        <h1 class="font-[Playfair_Display] text-3xl font-bold text-[#0A192F]">
+            Campaigns
+        </h1>
+
+        <p class="text-sm text-gray-500 mt-1">
+            Broadcast seasonal offers across the platform.
+        </p>
+
+    </div>
+
+
+    <div class="grid lg:grid-cols-[1fr_320px] gap-6">
+
+
+        <!-- Form -->
+
+        <form method="POST"
+              enctype="multipart/form-data"
+              class="bg-white rounded-xl border border-gray-200 p-6">
+
+            {% csrf_token %}
+
+            <div class="space-y-6">
+
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-2">
+                        Campaign Title
+                    </label>
+
+                    <input id="campaignTitle"
+                           type="text"
+                           name="title"
+                           required
+                           value="Eid Mega Discount"
+                           oninput="updatePreview()"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-lg">
+
+                </div>
+
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-2">
+                        Banner Image (16:9)
+                    </label>
+
+                    <input type="file"
+                           name="banner"
+                           accept="image/*"
+                           class="w-full border border-dashed border-gray-300 rounded-lg p-6">
+
+                </div>
+
+
+                <div class="grid md:grid-cols-2 gap-4">
+
+                    <div>
+
+                        <label class="block text-sm font-semibold mb-2">
+                            Discount %
+                        </label>
+
+                        <input id="discount"
+                               type="number"
+                               step="0.01"
+                               name="discount"
+                               value="25"
+                               oninput="updatePreview()"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-lg">
+
+                    </div>
+
+
+                    <div>
+
+                        <label class="block text-sm font-semibold mb-2">
+                            Promo Code
+                        </label>
+
+                        <input id="promoCode"
+                               type="text"
+                               name="promo_code"
+                               value="EID25"
+                               oninput="updatePreview()"
+                               class="w-full px-4 py-3 border border-gray-200 rounded-lg">
+
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-3">
+                        Target Audience
+                    </label>
+
+                    <div class="flex flex-wrap gap-6">
+
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox"
+                                   name="audience"
+                                   value="Customers"
+                                   checked
+                                   onchange="updatePreview()">
+                            Customers
+                        </label>
+
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox"
+                                   name="audience"
+                                   value="Tailors"
+                                   onchange="updatePreview()">
+                            Tailors
+                        </label>
+
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox"
+                                   name="audience"
+                                   value="Riders"
+                                   onchange="updatePreview()">
+                            Riders
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <label class="block text-sm font-semibold mb-2">
+                        Description
+                    </label>
+
+                    <textarea name="description"
+                              rows="3"
+                              class="w-full px-4 py-3 border border-gray-200 rounded-lg"
+                              placeholder="Campaign message...">Get up to 25% off custom tailoring this Eid.</textarea>
+
+                </div>
+
+
+                <button type="submit"
+                        class="px-6 py-3 rounded-lg bg-[#0A192F] text-white font-semibold">
+                    📣 Broadcast Now
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- Push Preview -->
+
+        <div>
+
+            <p class="text-sm font-bold text-gray-500 mb-3">
+                PUSH PREVIEW
+            </p>
+
+            <div class="bg-[#0A192F] rounded-3xl p-4">
+
+                <div class="bg-[#1E304A] rounded-2xl p-5">
+
+                    <div class="flex items-center gap-3 mb-4">
+
+                        <div class="w-8 h-8 rounded-lg bg-[#D4AF37] flex items-center justify-center text-[#0A192F] font-bold">
+                            S
+                        </div>
+
+                        <span class="text-white/70 text-sm">
+                            StitchSync · now
+                        </span>
+
+                    </div>
+
+
+                    <h3 id="previewTitle"
+                        class="text-white font-bold text-lg">
+                        Eid Mega Discount
+                    </h3>
+
+
+                    <p class="text-white/70 text-sm mt-2">
+                        Get up to
+                        <span id="previewDiscount">25</span>% off custom tailoring this Eid.
+                        Use code
+                        <span id="previewPromo">EID25</span>.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Previous Campaigns -->
+
+    {% if campaigns %}
+
+    <div class="mt-8">
+
+        <h2 class="font-[Playfair_Display] text-2xl font-bold text-[#0A192F] mb-4">
+            Previous Campaigns
+        </h2>
+
+        <div class="bg-white rounded-xl border border-gray-200 divide-y">
+
+            {% for campaign in campaigns %}
+
+            <div class="p-5 flex justify-between items-center">
+
+                <div>
+
+                    <h3 class="font-semibold text-[#0A192F]">
+                        {{ campaign.name }}
+                    </h3>
+
+                    <p class="text-sm text-gray-500">
+                        {{ campaign.discount_percentage }}%
+                        · {{ campaign.promo_code|default:"No promo code" }}
+                    </p>
+
+                </div>
+
+                <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold">
+                    BROADCASTED
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+
+<script>
+
+function updatePreview() {
+
+    const title =
+        document.getElementById("campaignTitle").value;
+
+    const discount =
+        document.getElementById("discount").value;
+
+    const promo =
+        document.getElementById("promoCode").value;
+
+    document.getElementById("previewTitle").innerText =
+        title || "Campaign Title";
+
+    document.getElementById("previewDiscount").innerText =
+        discount || "0";
+
+    document.getElementById("previewPromo").innerText =
+        promo || "PROMO";
+
+}
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,448 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.contrib.auth import logout
+from django.contrib import messages
+
+from .models import Design, UserProfile
+from adminpanel.models import Approval
+
+
+def home(request):
+    return render(request, "core/home.html")
+
+
+def gallery(request):
+    return render(request, "core/gallery.html")
+
+
+def pricing(request):
+    return render(request, "core/pricing.html")
+
+
+def contact(request):
+    return render(request, "core/contact.html")
+
+
+# =========================================================
+# ROLE REDIRECTION
+# =========================================================
+
+def redirect_based_on_role(user):
+    """Route users to the correct dashboard based on their role."""
+
+    # Admin / Staff / Superuser
+    if user.is_staff or user.is_superuser:
+        return redirect("adminpanel:dashboard")
+
+    try:
+        role = user.profile.role
+    except UserProfile.DoesNotExist:
+        role = "Customer"
+
+    # Tailor
+    if role == "Tailor":
+        return redirect("tailors:dashboard")
+
+    # Rider
+    elif role == "Rider":
+        return redirect("riders:dashboard")
+
+    # Admin profile
+    elif role == "Admin":
+        return redirect("adminpanel:dashboard")
+
+    # Customer
+    return redirect("customers:dashboard")
+
+
+# =========================================================
+# LOGIN
+# =========================================================
+
+def login_view(request):
+
+    if request.user.is_authenticated:
+        return redirect_based_on_role(request.user)
+
+    if request.method == "POST":
+
+        form = AuthenticationForm(
+            request,
+            data=request.POST
+        )
+
+        if form.is_valid():
+
+            user = form.get_user()
+
+            login(request, user)
+
+            return redirect_based_on_role(user)
+
+    else:
+        form = AuthenticationForm()
+
+    return render(
+        request,
+        "core/login.html",
+        {"form": form}
+    )
+
+
+# =========================================================
+# REGISTER
+# =========================================================
+
+def register_view(request):
+
+    # Already logged-in user
+    if request.user.is_authenticated:
+        return redirect_based_on_role(request.user)
+
+
+    if request.method == "POST":
+
+        # Get selected account type
+        role = request.POST.get("role", "").strip()
+
+
+        # =====================================================
+        # TAILOR
+        # =====================================================
+
+        if role == "Tailor":
+
+            username = request.POST.get(
+                "username_tailor",
+                ""
+            ).strip()
+
+            email = request.POST.get(
+                "email_tailor",
+                ""
+            ).strip()
+
+            password = request.POST.get(
+                "password_tailor",
+                ""
+            )
+
+            shop_name = request.POST.get(
+                "shop_name",
+                ""
+            ).strip()
+
+
+            if not username or not password or not email:
+
+                messages.error(
+                    request,
+                    "Please fill in all required Tailor fields."
+                )
+
+                return render(
+                    request,
+                    "core/register.html"
+                )
+
+
+            # Check duplicate username
+            if User.objects.filter(
+                username=username
+            ).exists():
+
+                messages.error(
+                    request,
+                    "This username is already taken."
+                )
+
+                return render(
+                    request,
+                    "core/register.html"
+                )
+
+
+            # Create User
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
+
+
+            # Tailor Profile
+            UserProfile.objects.create(
+                user=user,
+                role="Tailor",
+                shop_name=shop_name
+            )
+
+
+            # Pending Approval
+            Approval.objects.create(
+                user=user,
+                role="Tailor",
+                status="Pending"
+            )
+
+
+            # IMPORTANT:
+            # Do NOT login automatically.
+            messages.success(
+                request,
+                "Tailor account created successfully. "
+                "Your account is waiting for admin approval. "
+                "Please login after approval."
+            )
+
+            return redirect("core:login")
+
+
+        # =====================================================
+        # RIDER
+        # =====================================================
+
+        elif role == "Rider":
+
+            username = request.POST.get(
+                "username_rider",
+                ""
+            ).strip()
+
+            password = request.POST.get(
+                "password_rider",
+                ""
+            )
+
+            vehicle_type = request.POST.get(
+                "vehicle_type",
+                "Motorcycle"
+            )
+
+
+            if not username or not password:
+
+                messages.error(
+                    request,
+                    "Please fill in all required Rider fields."
+                )
+
+                return render(
+                    request,
+                    "core/register.html"
+                )
+
+
+            # Check duplicate username
+            if User.objects.filter(
+                username=username
+            ).exists():
+
+                messages.error(
+                    request,
+                    "This username is already taken."
+                )
+
+                return render(
+                    request,
+                    "core/register.html"
+                )
+
+
+            # Create User
+            user = User.objects.create_user(
+                username=username,
+                password=password
+            )
+
+
+            # Rider Profile
+            UserProfile.objects.create(
+                user=user,
+                role="Rider",
+                vehicle_type=vehicle_type
+            )
+
+
+            # Pending Approval
+            Approval.objects.create(
+                user=user,
+                role="Rider",
+                status="Pending"
+            )
+
+
+            # Do NOT login automatically
+            messages.success(
+                request,
+                "Rider account created successfully. "
+                "Your account is waiting for admin approval. "
+                "Please login after approval."
+            )
+
+            return redirect("core:login")
+
+
+        # =====================================================
+        # CUSTOMER
+        # =====================================================
+
+        elif role == "Customer":
+
+            username = request.POST.get(
+                "username",
+                ""
+            ).strip()
+
+            email = request.POST.get(
+                "email",
+                ""
+            ).strip()
+
+            password = request.POST.get(
+                "password",
+                ""
+            )
+
+
+            if not username or not password:
+
+                messages.error(
+                    request,
+                    "Please fill in all required Customer fields."
+                )
+
+                return render(
+                    request,
+                    "core/register.html"
+                )
+
+
+            # Check duplicate username
+            if User.objects.filter(
+                username=username
+            ).exists():
+
+                messages.error(
+                    request,
+                    "This username is already taken."
+                )
+
+                return render(
+                    request,
+                    "core/register.html"
+                )
+
+
+            # Create User
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
+
+
+            # Customer Profile
+            UserProfile.objects.create(
+                user=user,
+                role="Customer"
+            )
+
+
+            # Do NOT login automatically
+            messages.success(
+                request,
+                "Customer account created successfully. "
+                "Please login."
+            )
+
+            return redirect("core:login")
+
+
+        # =====================================================
+        # INVALID ROLE
+        # =====================================================
+
+        else:
+
+            messages.error(
+                request,
+                "Please select a valid account type."
+            )
+
+
+    return render(
+        request,
+        "core/register.html"
+    )
+
+
+# =========================================================
+# PUBLIC PAGES
+# =========================================================
+
+def tailor_list(request):
+    return render(
+        request,
+        "core/tailor_list.html"
+    )
+
+
+def tailor_details(request):
+    return render(
+        request,
+        "core/tailor_details.html"
+    )
+
+
+def marketplace_gallery_view(request):
+
+    designs_list = Design.objects.all().order_by(
+        "-created_at"
+    )
+
+    return render(
+        request,
+        "core/marketplace.html",
+        {"designs": designs_list}
+    )
+
+
+def marketplace_detail_view(request, pk):
+
+    design = get_object_or_404(
+        Design,
+        pk=pk
+    )
+
+    return render(
+        request,
+        "core/marketplace_detail.html",
+        {"design": design}
+    )
+
+
+def gallery_view(request):
+
+    gallery_items = Design.objects.all().order_by(
+        "-created_at"
+    )
+
+    return render(
+        request,
+        "core/gallery.html",
+        {"gallery_items": gallery_items}
+    )
+
+
+# =========================================================
+# LOGOUT
+# =========================================================
+
+def logout_view(request):
+
+    logout(request)
+
+    return redirect("core:home")

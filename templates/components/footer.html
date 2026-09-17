@@ -1,0 +1,38 @@
+<footer class="bg-navy text-gray-300 mt-auto border-t border-slate-800">
+    <div class="max-w-[1200px] mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div>
+            <h3 class="font-serif font-bold text-xl text-white mb-3">StitchSync</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+                Bespoke clothing, tailored online and delivered straight to your door.
+            </p>
+        </div>
+        <div>
+            <h4 class="text-white font-medium text-sm uppercase tracking-wider mb-3">Quick Links</h4>
+            <ul class="space-y-2 text-sm">
+                <li><a href="{% url 'core:home' %}" class="hover:text-gold transition">Home</a></li>
+                {% comment %} <li><a href="{% url 'core:marketplace' %}" class="hover:text-gold transition">Marketplace</a></li> {% endcomment %}
+                <li><a href="{% url 'core:pricing' %}" class="hover:text-gold transition">Pricing</a></li>
+                <li><a href="{% url 'core:contact' %}" class="hover:text-gold transition">Contact</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="text-white font-medium text-sm uppercase tracking-wider mb-3">Legal</h4>
+            <ul class="space-y-2 text-sm">
+                <li><a href="#" class="hover:text-gold transition">Privacy Policy</a></li>
+                <li><a href="#" class="hover:text-gold transition">Terms of Service</a></li>
+                <li><a href="#" class="hover:text-gold transition">Refund Policy</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="text-white font-medium text-sm uppercase tracking-wider mb-3">Contact</h4>
+            <ul class="space-y-2 text-sm text-gray-400">
+                <li>support@stitchsync.com</li>
+                <li>+880 1700 000000</li>
+                <li>Gulshan, Dhaka, Bangladesh</li>
+            </ul>
+        </div>
+    </div>
+    <div class="border-t border-slate-800 py-6 text-center text-xs text-gray-500">
+        &copy; 2026 StitchSync. All rights reserved.
+    </div>
+</footer>

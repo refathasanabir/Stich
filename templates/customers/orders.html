@@ -1,0 +1,56 @@
+{% extends 'customers/base.html' %}
+{% load static %}
+
+{% block title %}My Orders | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-8 px-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="font-serif text-2xl font-bold text-navy">My Orders</h1>
+            <p class="text-xs text-gray-500 mt-1">Track your bespoke tailoring orders and progress.</p>
+        </div>
+    </div>
+
+    {% if orders %}
+        <div class="space-y-4">
+            {% for order in orders %}
+                <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b gap-2">
+                        <div>
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Order #{{ order.id }}</span>
+                            <p class="text-xs text-gray-500">Placed on {{ order.date|date:"F j, Y" }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <!-- Status Badge -->
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full 
+                                {% if order.status == 'Pending' %}bg-yellow-50 text-yellow-700
+                                {% elif order.status == 'Processing' or order.status == 'Stitching' %}bg-blue-50 text-blue-700
+                                {% elif order.status == 'Completed' or order.status == 'Delivered' %}bg-green-50 text-green-700
+                                {% else %}bg-gray-50 text-gray-700{% endif %}">
+                                {{ order.status }}
+                            </span>
+                            <span class="font-bold text-navy text-sm">${{ order.total_price }}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Shipping & Delivery Address:</p>
+                            <p class="text-xs text-gray-500 max-w-md mt-0.5">{{ order.shipping_address }}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'customers:chat' %}" class="px-4 py-2 border border-gray-200 text-navy text-xs font-medium rounded-xl hover:bg-gray-50 transition">Contact Tailor</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+            <p class="text-gray-500 text-sm mb-4">You haven't placed any custom tailoring orders yet.</p>
+            <a href="{% url 'core:marketplace' %}" class="px-6 py-2.5 bg-navy text-white text-xs font-medium rounded-xl hover:bg-slate-800 transition">Browse Marketplace</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

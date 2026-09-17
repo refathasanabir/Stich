@@ -1,0 +1,218 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}
+Dashboard | StitchSync Admin
+{% endblock %}
+
+
+{% block content %}
+
+<section class="max-w-[1200px] mx-auto px-4 py-8">
+        
+    <!-- Page Heading -->
+    <div class="mb-8">
+
+        <h1 class="font-[Playfair_Display] text-3xl font-bold text-navy">
+            Dashboard
+        </h1>
+
+        <p class="text-sm text-slate mt-1">
+            Overview of your StitchSync platform.
+        </p>
+
+    </div>
+
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+
+
+        <!-- Total Orders -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+
+            <p class="text-sm text-slate">
+                Total Orders
+            </p>
+
+            <p class="text-3xl font-semibold text-navy mt-2">
+                {{ total_orders }}
+            </p>
+
+            <p class="text-xs text-slate mt-2">
+                All platform orders
+            </p>
+
+        </div>
+
+
+        <!-- Total Customers -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+
+            <p class="text-sm text-slate">
+                Total Customers
+            </p>
+
+            <p class="text-3xl font-semibold text-navy mt-2">
+                {{ total_customers }}
+            </p>
+
+            <p class="text-xs text-slate mt-2">
+                Registered customers
+            </p>
+
+        </div>
+
+
+        <!-- Pending Orders -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+
+            <p class="text-sm text-slate">
+                Pending Orders
+            </p>
+
+            <p class="text-3xl font-semibold text-warning mt-2">
+                {{ pending_orders }}
+            </p>
+
+            <p class="text-xs text-slate mt-2">
+                Waiting for action
+            </p>
+
+        </div>
+
+
+        <!-- Delivered Orders -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+
+            <p class="text-sm text-slate">
+                Delivered Orders
+            </p>
+
+            <p class="text-3xl font-semibold text-success mt-2">
+                {{ delivered_orders }}
+            </p>
+
+            <p class="text-xs text-slate mt-2">
+                Successfully delivered
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Recent Orders -->
+    <div class="bg-white rounded-xl border border-gray-200">
+
+        <div class="p-5 border-b border-gray-200">
+
+            <h2 class="text-lg font-semibold text-navy">
+                Recent Orders
+            </h2>
+
+            <p class="text-sm text-slate mt-1">
+                Latest orders from customers
+            </p>
+
+        </div>
+
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full text-sm">
+
+                <thead class="bg-gray-50">
+
+                    <tr class="text-left">
+
+                        <th class="px-5 py-3 text-slate font-medium">
+                            Order ID
+                        </th>
+
+                        <th class="px-5 py-3 text-slate font-medium">
+                            Customer
+                        </th>
+
+                        <th class="px-5 py-3 text-slate font-medium">
+                            Product
+                        </th>
+
+                        <th class="px-5 py-3 text-slate font-medium">
+                            Shop
+                        </th>
+
+                        <th class="px-5 py-3 text-slate font-medium">
+                            Status
+                        </th>
+
+                        <th class="px-5 py-3 text-slate font-medium">
+                            Total
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for order in recent_orders %}
+
+                    <tr class="border-t border-gray-100">
+
+                        <td class="px-5 py-4 font-semibold text-navy">
+                            {{ order.order_id }}
+                        </td>
+
+                        <td class="px-5 py-4">
+                            {{ order.customer_name }}
+                        </td>
+
+                        <td class="px-5 py-4 text-slate">
+                            {{ order.product_name }}
+                        </td>
+
+                        <td class="px-5 py-4 text-slate">
+                            {{ order.shop_name }}
+                        </td>
+
+                        <td class="px-5 py-4">
+
+                            <span class="px-2.5 py-1 rounded-full text-xs bg-gray-100">
+                                {{ order.status }}
+                            </span>
+
+                        </td>
+
+                        <td class="px-5 py-4 font-semibold text-navy">
+                            ${{ order.total_price }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="px-5 py-10 text-center text-slate"
+                        >
+                            No orders found.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,256 @@
+/* Core Variables */
+:root {
+    --navy: #0A192F;
+    --gold: #D4AF37;
+    --bg-color: #F8F9FA;
+    --text-main: #333333;
+    --text-muted: #6C757D;
+    --border: #E5E7EB;
+}
+
+/* Base Setup */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--navy);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Cards & Layout */
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card-title {
+    margin-top: 0;
+    color: var(--navy);
+    font-size: 1.2rem;
+}
+
+/* Buttons & Badges */
+.btn {
+    background-color: var(--navy);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.badge {
+    background-color: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+
+/* Profile Specifics */
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.avatar {
+    background-color: var(--navy);
+    color: var(--gold);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.badge-gold {
+    background-color: var(--gold);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    margin-left: 10px;
+}
+
+.action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.btn-secondary {
+    background-color: #f1f3f5;
+    color: var(--navy);
+    border: 1px solid #ced4da;
+    flex: 1;
+    text-align: center;
+}
+
+.btn-danger {
+    background-color: #ffe3e3;
+    color: var(--error, #dc3545);
+    border: 1px solid #ffc9c9;
+}
+
+
+/* Hero Section */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 50px 0;
+    gap: 40px;
+}
+
+.hero-content {
+    flex: 1;
+}
+
+.hero-title {
+    font-size: 3rem;
+    color: var(--navy);
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.hero-title span {
+    color: var(--gold);
+}
+
+.hero-text {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.stat-item h4 {
+    font-size: 1.8rem;
+    color: var(--navy);
+    margin: 0;
+}
+
+.stat-item p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Section Shared */
+.section-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.step-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #f4ecd0;
+    float: right;
+    margin-top: -10px;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--navy);
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}

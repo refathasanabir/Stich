@@ -1,0 +1,213 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Clothing Categories | StitchSync Admin{% endblock %}
+
+{% block content %}
+
+<section class="max-w-[1200px] mx-auto px-4 py-8">
+
+    <div class="flex justify-between items-start mb-6">
+
+        <div>
+            <h1 class="font-[Playfair_Display] text-3xl font-bold text-[#0A192F]">
+                Clothing Categories
+            </h1>
+
+            <p class="text-sm text-gray-500 mt-1">
+                Garment types available across the marketplace.
+            </p>
+        </div>
+
+        <button onclick="openAddModal()"
+                class="px-5 py-3 rounded-lg bg-[#0A192F] text-white font-semibold">
+            + Add Category
+        </button>
+
+    </div>
+
+
+    <!-- Search -->
+
+    <div class="mb-6">
+
+        <input id="categorySearch"
+               type="text"
+               placeholder="Search clothing categories..."
+               onkeyup="searchCategories()"
+               class="w-full max-w-[450px] px-4 py-3 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#0A192F]/20">
+
+    </div>
+
+
+    <!-- Cards -->
+
+    <div id="categoryGrid"
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        {% for category in categories %}
+
+        <div class="category-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+
+            <div class="flex justify-between items-start">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="w-10 h-10 rounded-xl bg-[#0A192F] text-white flex items-center justify-center">
+                        ✂
+                    </div>
+
+                    <div>
+
+                        <h3 class="font-[Playfair_Display] text-xl font-bold text-[#0A192F]">
+                            {{ category.name }}
+                        </h3>
+
+                        <p class="text-xs text-gray-500">
+                            Clothing category
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form method="POST">
+
+                    {% csrf_token %}
+
+                    <input type="hidden"
+                           name="action"
+                           value="delete">
+
+                    <input type="hidden"
+                           name="category_id"
+                           value="{{ category.id }}">
+
+                    <button type="submit"
+                            onclick="return confirm('Delete this category?')"
+                            class="w-9 h-9 border border-gray-200 rounded-lg text-red-500">
+                        🗑
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <p class="text-sm text-gray-500 mt-5">
+                {{ category.description|default:"No description available." }}
+            </p>
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-span-full text-center py-16 text-gray-500">
+            No clothing categories found.
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<!-- Add Modal -->
+
+<div id="addModal"
+     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-2xl w-full max-w-lg p-7 mx-4">
+
+        <h2 class="font-[Playfair_Display] text-2xl font-bold text-[#0A192F] mb-6">
+            Add Clothing Category
+        </h2>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <input type="hidden"
+                   name="action"
+                   value="add">
+
+            <label class="block text-sm font-semibold mb-2">
+                Name
+            </label>
+
+            <input type="text"
+                   name="name"
+                   required
+                   placeholder="e.g. Kurta"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-lg mb-5">
+
+            <label class="block text-sm font-semibold mb-2">
+                Description
+            </label>
+
+            <input type="text"
+                   name="description"
+                   placeholder="Short description"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-lg mb-6">
+
+            <div class="flex items-center gap-4">
+
+                <button type="submit"
+                        class="px-5 py-3 rounded-lg bg-[#0A192F] text-white font-semibold">
+                    Add Category
+                </button>
+
+                <button type="button"
+                        onclick="closeAddModal()"
+                        class="font-semibold text-gray-600">
+                    Cancel
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function openAddModal() {
+    const modal = document.getElementById("addModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+}
+
+function closeAddModal() {
+    const modal = document.getElementById("addModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+}
+
+function searchCategories() {
+
+    const value = document
+        .getElementById("categorySearch")
+        .value
+        .toLowerCase();
+
+    document
+        .querySelectorAll(".category-card")
+        .forEach(card => {
+
+            card.style.display =
+                card.innerText
+                    .toLowerCase()
+                    .includes(value)
+                    ? ""
+                    : "none";
+
+        });
+}
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,584 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Profile · StitchSync{% endblock %}
+
+{% block content %}
+
+<style>
+    /* =========================================
+       PROFILE PAGE
+    ========================================= */
+
+    .profile-page {
+        width: 100%;
+        padding: 32px;
+        box-sizing: border-box;
+    }
+
+    /* =========================================
+       PAGE HEADER
+    ========================================= */
+
+    .profile-page-header {
+        margin-bottom: 28px;
+    }
+
+    .profile-page-header h1 {
+        margin: 0;
+        color: #0A192F;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .profile-page-header p {
+        margin: 8px 0 0;
+        color: #6C757D;
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    /* =========================================
+       COMMON CARD
+    ========================================= */
+
+    .profile-card {
+        width: 100%;
+        background: #FFFFFF;
+        border: 1px solid #E1E5EA;
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(10, 25, 47, 0.04);
+        box-sizing: border-box;
+    }
+
+    /* =========================================
+       PROFILE SUMMARY
+    ========================================= */
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+
+        flex-shrink: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 12px;
+
+        background: #0A192F;
+        color: #D4AF37;
+
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .profile-summary-info h2 {
+        margin: 0 0 6px;
+
+        color: #0A192F;
+
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .profile-email {
+        color: #6C757D;
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 14px;
+    }
+
+    .profile-phone {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        margin-top: 6px;
+
+        color: #6C757D;
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 13px;
+    }
+
+    /* =========================================
+       SECTION CARDS
+    ========================================= */
+
+    .profile-section {
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .profile-section-title {
+        margin: 0 0 20px;
+
+        color: #0A192F;
+
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    /* =========================================
+       ACCOUNT DETAILS
+    ========================================= */
+
+    .account-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 16px;
+    }
+
+    /* =========================================
+       PASSWORD
+    ========================================= */
+
+    .password-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    /* =========================================
+       FORM
+    ========================================= */
+
+    .profile-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .profile-field label {
+        margin-bottom: 8px;
+
+        color: #212529;
+
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .profile-field input {
+        width: 100%;
+        height: 46px;
+
+        padding: 0 13px;
+
+        box-sizing: border-box;
+
+        border: 1px solid #D8DEE6;
+        border-radius: 8px;
+
+        background: #FFFFFF;
+        color: #212529;
+
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 14px;
+
+        outline: none;
+
+        transition: border-color 0.2s ease,
+                    box-shadow 0.2s ease;
+    }
+
+    .profile-field input:focus {
+        border-color: #D4AF37;
+
+        box-shadow:
+            0 0 0 3px rgba(212, 175, 55, 0.12);
+    }
+
+    .profile-field input[readonly] {
+        background: #F8F9FA;
+        color: #6C757D;
+    }
+
+    /* =========================================
+       BUTTON AREA
+    ========================================= */
+
+    .profile-actions {
+        margin-top: 20px;
+    }
+
+    .profile-btn {
+        height: 44px;
+
+        padding: 0 18px;
+
+        border-radius: 8px;
+
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+
+        cursor: pointer;
+
+        transition: all 0.2s ease;
+    }
+
+    .profile-btn-primary {
+        border: 1px solid #0A192F;
+        background: #0A192F;
+        color: #FFFFFF;
+    }
+
+    .profile-btn-primary:hover {
+        background: #132844;
+    }
+
+    .profile-btn-secondary {
+        border: 1px solid #0A192F;
+        background: #FFFFFF;
+        color: #0A192F;
+    }
+
+    .profile-btn-secondary:hover {
+        background: #F1F3F5;
+    }
+
+    /* =========================================
+       PASSWORD TITLE
+    ========================================= */
+
+    .password-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .password-lock {
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+    }
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+
+    @media (max-width: 900px) {
+
+        .password-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+    @media (max-width: 700px) {
+
+        .profile-page {
+            padding: 20px 16px;
+        }
+
+        .profile-page-header h1 {
+            font-size: 30px;
+        }
+
+        .account-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-summary {
+            padding: 20px;
+        }
+
+        .profile-section {
+            padding: 20px;
+        }
+
+    }
+
+    @media (max-width: 480px) {
+
+        .profile-summary {
+            align-items: flex-start;
+        }
+
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            font-size: 24px;
+        }
+
+        .profile-summary-info h2 {
+            font-size: 19px;
+        }
+
+    }
+</style>
+
+
+<div class="profile-page">
+
+    <!-- =========================================
+         PAGE HEADER
+    ========================================= -->
+
+    <div class="profile-page-header">
+
+        <h1>
+            Profile
+        </h1>
+
+        <p>
+            Manage your administrator account.
+        </p>
+
+    </div>
+
+
+    <!-- =========================================
+         PROFILE SUMMARY
+    ========================================= -->
+
+    <div class="profile-card profile-summary">
+
+        <div class="profile-avatar">
+            {{ request.user.username|first|upper }}
+        </div>
+
+        <div class="profile-summary-info">
+
+            <h2>
+                Platform Admin
+            </h2>
+
+            <div class="profile-email">
+                {{ request.user.email|default:"admin@stitchsync.com" }}
+            </div>
+
+            <div class="profile-phone">
+                <span>☎</span>
+                +880 1700 000000
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         ACCOUNT DETAILS
+    ========================================= -->
+
+    <div class="profile-card profile-section">
+
+        <h2 class="profile-section-title">
+            Account Details
+        </h2>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="action"
+                value="profile"
+            >
+
+
+            <div class="account-grid">
+
+                <!-- Full Name -->
+                <div class="profile-field">
+
+                    <label for="full_name">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        value="{{ request.user.get_full_name|default:'Platform Admin' }}"
+                    >
+
+                </div>
+
+
+                <!-- Email -->
+                <div class="profile-field">
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="{{ request.user.email }}"
+                    >
+
+                </div>
+
+
+                <!-- Phone -->
+                <div class="profile-field">
+
+                    <label for="phone">
+                        Phone
+                    </label>
+
+                    <input
+                        type="text"
+                        id="phone"
+                        name="phone"
+                        value="+880 1700 000000"
+                    >
+
+                </div>
+
+
+                <!-- Role -->
+                <div class="profile-field">
+
+                    <label for="role">
+                        Role
+                    </label>
+
+                    <input
+                        type="text"
+                        id="role"
+                        value="Super Admin"
+                        readonly
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-actions">
+
+                <button
+                    type="submit"
+                    class="profile-btn profile-btn-primary"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =========================================
+         CHANGE PASSWORD
+    ========================================= -->
+
+    <div class="profile-card profile-section">
+
+        <h2 class="profile-section-title password-title">
+
+            <span class="password-lock">
+                🔒
+            </span>
+
+            Change Password
+
+        </h2>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="action"
+                value="password"
+            >
+
+
+            <div class="password-grid">
+
+                <!-- Current -->
+                <div class="profile-field">
+
+                    <label for="current_password">
+                        Current Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="current_password"
+                        name="current_password"
+                        placeholder="••••••••"
+                    >
+
+                </div>
+
+
+                <!-- New -->
+                <div class="profile-field">
+
+                    <label for="new_password">
+                        New Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="new_password"
+                        name="new_password"
+                        placeholder="••••••••"
+                    >
+
+                </div>
+
+
+                <!-- Confirm -->
+                <div class="profile-field">
+
+                    <label for="confirm_password">
+                        Confirm Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="••••••••"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-actions">
+
+                <button
+                    type="submit"
+                    class="profile-btn profile-btn-secondary"
+                >
+                    Update Password
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Tailor Shops | StitchSync{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-navy font-serif">Tailor Shops</h1>
+    <p class="text-gray-500 text-sm mt-1">Choose a shop to start a custom order.</p>
+</div>
+
+<div class="mb-6 max-w-md">
+    <input type="text" placeholder="Search shops by name, area or specialty…" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm">
+</div>
+
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:-translate-y-1 transition">
+        <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Shop" class="w-full h-40 object-cover">
+        <div class="p-5">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-navy text-lg">Heritage Stitch</h3>
+                <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">★ 4.9</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Gulshan, Dhaka</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <span class="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium">Panjabi</span>
+                <span class="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium">Suit</span>
+            </div>
+            <a href="{% url 'core:tailor_details' %}" class="block w-full mt-5 py-2.5 bg-navy text-white text-center rounded-xl text-sm font-medium hover:bg-slate-800 transition">View Shop</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

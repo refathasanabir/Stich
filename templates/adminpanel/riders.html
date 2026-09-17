@@ -1,0 +1,236 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Riders | StitchSync Admin{% endblock %}
+
+{% block content %}
+
+<section class="max-w-[1200px] mx-auto px-4 py-8">
+
+    <!-- Page Header -->
+    <div class="mb-6">
+
+        <h1 class="font-[Playfair_Display] text-3xl font-bold text-navy">
+            Riders
+        </h1>
+
+        <p class="text-sm text-slate mt-1">
+            View and manage registered delivery riders.
+        </p>
+
+    </div>
+
+
+    <!-- Search -->
+    <form method="get" class="mb-6">
+
+        <div class="relative max-w-md">
+
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="Search by rider, username, vehicle or email..."
+                class="w-full h-11 pl-11 pr-4
+                       border border-gray-200
+                       rounded-lg
+                       bg-white
+                       text-sm
+                       text-charcoal
+                       outline-none
+                       focus:border-navy
+                       focus:ring-1
+                       focus:ring-navy"
+            >
+
+            <!-- Search Icon -->
+            <span
+                class="absolute left-4 top-1/2 -translate-y-1/2
+                       text-slate text-sm"
+            >
+                🔍
+            </span>
+
+        </div>
+
+    </form>
+
+
+    <!-- Riders Table -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+
+        <div class="p-6 overflow-x-auto">
+
+            <table class="w-full text-sm">
+
+                <thead>
+
+                    <tr class="border-b border-gray-200 text-left">
+
+                        <th class="pb-4 font-semibold text-slate">
+                            Rider
+                        </th>
+
+                        <th class="pb-4 font-semibold text-slate">
+                            Username
+                        </th>
+
+                        <th class="pb-4 font-semibold text-slate">
+                            Vehicle
+                        </th>
+
+                        <th class="pb-4 font-semibold text-slate">
+                            Contact
+                        </th>
+
+                        <th class="pb-4 font-semibold text-slate">
+                            Registered
+                        </th>
+
+                        <th class="pb-4 font-semibold text-slate">
+                            Status
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for rider in riders %}
+
+                    <tr class="border-b border-gray-100 last:border-0">
+
+                        <!-- Rider -->
+                        <td class="py-4">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-semibold">
+                                    {{ rider.user.username|first|upper }}
+                                </div>
+
+                                <div>
+
+                                    <p class="font-semibold text-navy">
+
+                                        {% if rider.user.get_full_name %}
+                                            {{ rider.user.get_full_name }}
+                                        {% else %}
+                                            {{ rider.user.username }}
+                                        {% endif %}
+
+                                    </p>
+
+                                    <p class="text-xs text-slate mt-1">
+                                        Delivery Rider
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Username -->
+                        <td class="py-4 text-slate">
+                            {{ rider.user.username }}
+                        </td>
+
+
+                        <!-- Vehicle -->
+                        <td class="py-4 text-slate">
+
+                            {% if rider.vehicle_type %}
+                                {{ rider.vehicle_type }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Contact -->
+                        <td class="py-4 text-slate">
+
+                            {% if rider.user.email %}
+                                {{ rider.user.email }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Registered -->
+                        <td class="py-4 text-slate">
+                            {{ rider.user.date_joined|date:"Y-m-d" }}
+                        </td>
+
+
+                        <!-- Status -->
+                        <td class="py-4">
+
+                            {% if rider.user.is_active %}
+
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                                    Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+                                    Inactive
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6" class="py-12 text-center">
+
+                            <p class="text-slate font-medium">
+
+                                {% if query %}
+                                    No matching riders found.
+                                {% else %}
+                                    No riders found.
+                                {% endif %}
+
+                            </p>
+
+                            <p class="text-sm text-gray-400 mt-1">
+
+                                {% if query %}
+                                    Try a different search term.
+                                {% else %}
+                                    Registered delivery riders will appear here.
+                                {% endif %}
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

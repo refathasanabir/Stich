@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Price List | StitchSync{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-[#0A192F] font-serif">Price List</h1>
+    <p class="text-gray-500 text-sm mt-1">Transparent base stitching rates across categories.</p>
+</div>
+
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-[#0A192F] font-bold text-lg">Panjabi</h3>
+        <div class="mt-4 flex items-end gap-2">
+            <span class="font-serif text-[#0A192F] text-3xl font-bold">$45</span>
+            <span class="text-gray-500 text-xs mb-1">base</span>
+        </div>
+        <div class="text-xs text-gray-500 mt-1">Premium finish from $65</div>
+        <div class="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500">Delivery in 5 days · Free fitting trial</div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-[#0A192F] font-bold text-lg">Two-Piece Suit</h3>
+        <div class="mt-4 flex items-end gap-2">
+            <span class="font-serif text-[#0A192F] text-3xl font-bold">$120</span>
+            <span class="text-gray-500 text-xs mb-1">base</span>
+        </div>
+        <div class="text-xs text-gray-500 mt-1">Premium finish from $160</div>
+        <div class="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500">Delivery in 7 days · Free fitting trial</div>
+    </div>
+</div>
+{% endblock %}

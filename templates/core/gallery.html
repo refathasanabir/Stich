@@ -1,0 +1,70 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Design Gallery | StitchSync{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-[#0A192F] font-serif">Marketplace Gallery</h1>
+    <p class="text-gray-500 text-sm mt-1">Browse designs published by our tailor shops and order your custom fit.</p>
+</div>
+
+<!-- Search Bar -->
+<div class="mb-6">
+    <div class="relative max-w-full">
+        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+            <i data-lucide="search" class="w-4 h-4"></i>
+        </span>
+        <input type="text" placeholder="Search products by name, shop or category…" class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#0A192F] text-sm shadow-sm">
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-[260px_1fr] gap-8">
+    <!-- Filters Sidebar -->
+    <aside>
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <h3 class="text-[#0A192F] font-bold text-sm uppercase tracking-wider mb-4">Category</h3>
+            <div class="space-y-3 mb-6">
+                <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" class="accent-[#0A192F] h-4 w-4 rounded"> Panjabi
+                </label>
+                <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" class="accent-[#0A192F] h-4 w-4 rounded"> Shirt
+                </label>
+                <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" class="accent-[#0A192F] h-4 w-4 rounded"> Blouse
+                </label>
+                <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" class="accent-[#0A192F] h-4 w-4 rounded"> Suit
+                </label>
+            </div>
+
+            <h3 class="text-[#0A192F] font-bold text-sm uppercase tracking-wider mb-2">Max Price</h3>
+            <input type="range" min="30" max="250" value="250" class="w-full accent-[#0A192F]">
+            <div class="text-sm font-bold text-[#0A192F] mt-2">Up to $250</div>
+        </div>
+    </aside>
+
+    <!-- Design Grid -->
+    <div>
+        <div class="text-gray-500 text-sm mb-4">4 designs found</div>
+        <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:-translate-y-1 transition">
+                <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Design" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <span class="inline-block px-2.5 py-1 bg-gray-100 text-[#0A192F] text-xs font-bold rounded-full mb-2">Panjabi</span>
+                    <h4 class="font-bold text-[#0A192F] text-base">Classic Executive Panjabi</h4>
+                    <p class="text-xs text-gray-500 mt-1">Heritage Stitch</p>
+                    <div class="flex items-center justify-between mt-4">
+                        <div>
+                            <span class="text-xs text-gray-400">from</span>
+                            <div class="font-serif text-[#0A192F] font-bold text-xl">$65</div>
+                        </div>
+                        <a href="{% url 'core:login' %}" class="px-4 py-2 bg-[#0A192F] text-white text-xs font-medium rounded-xl hover:bg-slate-800 transition">Order</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

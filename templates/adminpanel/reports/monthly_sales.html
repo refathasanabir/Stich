@@ -1,0 +1,326 @@
+{% extends "adminpanel/base.html" %}
+
+{% block content %}
+
+<div class="report-page">
+
+    <div class="report-container">
+
+        <!-- ================= PAGE HEADER ================= -->
+
+        <div class="report-page-header">
+
+            <h1>
+                Monthly Sales Reports (PDF)
+            </h1>
+
+            <p>
+                Download month-end sales summaries.
+            </p>
+
+        </div>
+
+
+        <!-- ================= REPORT TABLE CARD ================= -->
+
+        <div class="monthly-report-card">
+
+            <div class="monthly-table-wrapper">
+
+                <table class="monthly-report-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Month
+                            </th>
+
+                            <th>
+                                GMV
+                            </th>
+
+                            <th>
+                                Orders
+                            </th>
+
+                            <th>
+                                Net Revenue
+                            </th>
+
+                            <th>
+                                Report
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for item in months %}
+
+                        <tr>
+
+                            <!-- MONTH -->
+
+                            <td class="month-name">
+                                {{ item.name }}
+                            </td>
+
+
+                            <!-- GMV -->
+
+                            <td>
+                                ${{ item.gmv|floatformat:2 }}
+                            </td>
+
+
+                            <!-- ORDERS -->
+
+                            <td>
+                                {{ item.orders }}
+                            </td>
+
+
+                            <!-- REVENUE -->
+
+                            <td class="monthly-revenue">
+                                ${{ item.revenue|floatformat:2 }}
+                            </td>
+
+
+                            <!-- PDF -->
+
+                            <td class="pdf-cell">
+
+                                <a
+                                    href="{% url 'adminpanel:monthly_report_pdf' item.year item.month %}"
+                                    class="download-pdf-btn"
+                                >
+
+                                    <span>▣</span>
+
+                                    Download PDF
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="empty-report"
+                            >
+                                No monthly sales reports available.
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* =========================================
+   PAGE
+========================================= */
+
+.report-page {
+    background: #f8f9fa;
+    min-height: calc(100vh - 80px);
+    padding: 32px 24px 60px;
+}
+
+.report-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.report-page-header {
+    margin-bottom: 28px;
+}
+
+.report-page-header h1 {
+    margin: 0;
+    color: #0a192f;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.report-page-header p {
+    margin: 8px 0 0;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.monthly-report-card {
+    background: #ffffff;
+    border: 1px solid #e2e6ea;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 7px rgba(10, 25, 47, 0.04);
+}
+
+
+/* =========================================
+   TABLE WRAPPER
+========================================= */
+
+.monthly-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+/* =========================================
+   TABLE
+========================================= */
+
+.monthly-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+.monthly-report-table th,
+.monthly-report-table td {
+    padding: 14px 8px;
+    border-bottom: 1px solid #e8ebef;
+    text-align: left;
+    font-size: 14px;
+}
+
+.monthly-report-table th {
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.monthly-report-table td {
+    color: #6c757d;
+}
+
+.monthly-report-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================================
+   MONTH
+========================================= */
+
+.month-name {
+    color: #0a192f !important;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   REVENUE
+========================================= */
+
+.monthly-revenue {
+    color: #0a192f !important;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   PDF BUTTON
+========================================= */
+
+.pdf-cell {
+    text-align: left;
+}
+
+.download-pdf-btn {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #0a192f;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #0a192f;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: 0.2s ease;
+}
+
+.download-pdf-btn:hover {
+    background: #0a192f;
+    color: #ffffff;
+}
+
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.empty-report {
+    padding: 40px !important;
+    text-align: center !important;
+    color: #6c757d !important;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .report-page {
+        padding: 24px 16px 40px;
+    }
+
+    .report-page-header h1 {
+        font-size: 29px;
+    }
+
+    .monthly-report-card {
+        padding: 16px;
+    }
+
+}
+
+</style>
+
+{% endblock %}

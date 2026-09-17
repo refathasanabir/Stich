@@ -1,0 +1,325 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Approvals | StitchSync Admin{% endblock %}
+
+{% block content %}
+
+<section class="max-w-[1200px] mx-auto px-4 py-8">
+
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="font-serif text-3xl font-bold text-[#0A192F]">
+            Approvals
+        </h1>
+
+        <p class="text-sm text-[#6C757D] mt-1">
+            Vet new tailor shops and riders.
+        </p>
+    </div>
+
+
+    <!-- Tabs -->
+    <div class="flex gap-1 p-1 bg-gray-200 rounded-lg w-fit mb-6">
+
+        <!-- Pending Shops -->
+        <a
+            href="{% url 'adminpanel:approvals' %}"
+            class="h-9 px-5 rounded-md flex items-center text-[13px] font-semibold transition
+            {% if active_tab == 'shops' %}
+                bg-white text-[#0A192F] shadow-sm
+            {% else %}
+                text-[#6C757D] hover:text-[#0A192F]
+            {% endif %}"
+        >
+            Pending Shops
+        </a>
+
+
+        <!-- Pending Riders -->
+        <a
+            href="{% url 'adminpanel:approvals' %}?tab=riders"
+            class="h-9 px-5 rounded-md flex items-center text-[13px] font-semibold transition
+            {% if active_tab == 'riders' %}
+                bg-white text-[#0A192F] shadow-sm
+            {% else %}
+                text-[#6C757D] hover:text-[#0A192F]
+            {% endif %}"
+        >
+            Pending Riders
+        </a>
+
+    </div>
+
+
+    <!-- Search -->
+    <form method="get" class="mb-6">
+
+        <input
+            type="hidden"
+            name="tab"
+            value="{{ active_tab }}"
+        >
+
+        <div class="relative max-w-md">
+
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="{% if active_tab == 'shops' %}Search by shop, owner or email...{% else %}Search by rider or email...{% endif %}"
+                class="w-full h-11 pl-11 pr-4
+                       border border-gray-200
+                       rounded-lg
+                       bg-white
+                       text-sm
+                       text-[#212529]
+                       outline-none
+                       focus:border-[#0A192F]
+                       focus:ring-1
+                       focus:ring-[#0A192F]"
+            >
+
+            <!-- Search Icon -->
+            <span
+                class="absolute left-4 top-1/2 -translate-y-1/2
+                       text-[#6C757D] text-sm"
+            >
+                🔍
+            </span>
+
+        </div>
+
+    </form>
+
+
+    <!-- Approvals Card -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+
+        <div class="p-6 overflow-x-auto">
+
+            <table class="w-full text-sm">
+
+                <!-- Table Header -->
+                <thead>
+                    <tr class="border-b border-gray-200 text-left">
+
+                        <th class="px-4 py-3 font-semibold text-[#6C757D]">
+                            {% if active_tab == 'shops' %}
+                                Shop Name
+                            {% else %}
+                                Rider
+                            {% endif %}
+                        </th>
+
+                        <th class="px-4 py-3 font-semibold text-[#6C757D]">
+                            {% if active_tab == 'shops' %}
+                                Owner
+                            {% else %}
+                                Vehicle
+                            {% endif %}
+                        </th>
+
+                        <th class="px-4 py-3 font-semibold text-[#6C757D]">
+                            Contact
+                        </th>
+
+                        <th class="px-4 py-3 font-semibold text-[#6C757D]">
+                            Docs
+                        </th>
+
+                        <th class="px-4 py-3 font-semibold text-[#6C757D]">
+                            Registered
+                        </th>
+
+                        <th class="px-4 py-3 font-semibold text-[#6C757D] text-right">
+                            Actions
+                        </th>
+
+                    </tr>
+                </thead>
+
+
+                <!-- Table Body -->
+                <tbody>
+
+                    {% for approval in approvals %}
+
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+
+                        <!-- Name -->
+                        <td class="px-4 py-4 font-semibold text-[#0A192F]">
+
+                            {% if active_tab == 'shops' %}
+
+                                {{ approval.user.profile.shop_name|default:approval.user.username }}
+
+                            {% else %}
+
+                                {{ approval.user.get_full_name|default:approval.user.username }}
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Owner / Vehicle -->
+                        <td class="px-4 py-4 text-[#6C757D]">
+
+                            {% if active_tab == 'shops' %}
+
+                                {% if approval.user.get_full_name %}
+                                    {{ approval.user.get_full_name }}
+                                {% else %}
+                                    {{ approval.user.username }}
+                                {% endif %}
+
+                            {% else %}
+
+                                {{ approval.user.profile.vehicle_type|default:"Not provided" }}
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Contact -->
+                        <td class="px-4 py-4 text-[#6C757D]">
+                            {{ approval.user.email|default:"Not provided" }}
+                        </td>
+
+
+                        <!-- Documents -->
+                        <td class="px-4 py-4">
+
+                            <button
+                                type="button"
+                                class="inline-flex items-center gap-2
+                                       px-3 py-1.5
+                                       rounded-lg
+                                       border border-gray-200
+                                       text-xs font-semibold
+                                       text-[#0A192F]
+                                       hover:bg-gray-100
+                                       transition"
+                            >
+                                View PDF
+                            </button>
+
+                        </td>
+
+
+                        <!-- Registered -->
+                        <td class="px-4 py-4 text-[#6C757D] whitespace-nowrap">
+                            {{ approval.submitted_at|date:"Y-m-d" }}
+                        </td>
+
+
+                        <!-- Actions -->
+                        <td class="px-4 py-4">
+
+                            <div class="flex items-center justify-end gap-2">
+
+                                <!-- Approve -->
+                                <form
+                                    method="post"
+                                    action="{% url 'adminpanel:approve_approval' approval.id %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        title="Approve"
+                                        class="w-9 h-9
+                                               rounded-lg
+                                               flex items-center justify-center
+                                               bg-green-50
+                                               text-green-600
+                                               hover:bg-green-100
+                                               transition"
+                                    >
+                                        ✓
+                                    </button>
+
+                                </form>
+
+
+                                <!-- Reject -->
+                                <form
+                                    method="post"
+                                    action="{% url 'adminpanel:reject_approval' approval.id %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        title="Reject"
+                                        class="w-9 h-9
+                                               rounded-lg
+                                               flex items-center justify-center
+                                               bg-red-50
+                                               text-red-600
+                                               hover:bg-red-100
+                                               transition"
+                                    >
+                                        ✕
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <!-- Empty State -->
+                    <tr>
+
+                        <td colspan="6" class="px-4 py-16 text-center">
+
+                            <div class="text-[#6C757D]">
+
+                                <div class="text-3xl mb-3">
+                                    ✓
+                                </div>
+
+                                <p class="font-semibold text-[#0A192F]">
+                                    {% if query %}
+                                        No matching approvals found
+                                    {% else %}
+                                        No pending approvals
+                                    {% endif %}
+                                </p>
+
+                                <p class="text-sm mt-1">
+                                    {% if query %}
+                                        Try a different search term.
+                                    {% else %}
+                                        New tailor shops and riders will appear here.
+                                    {% endif %}
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}StitchSync Admin{% endblock %}
+    </title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: "#0A192F",
+                        gold: "#D4AF37",
+                        adminbg: "#F1F3F5",
+                        charcoal: "#212529",
+                        slate: "#6C757D",
+                        success: "#10B981",
+                        warning: "#F59E0B",
+                        error: "#EF4444",
+                        info: "#3B82F6",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+
+<body class="bg-adminbg text-charcoal font-[Inter] min-h-screen">
+
+    <!-- Shared Header -->
+   <!-- Shared Admin Header -->
+    {% include "adminpanel/components/navbar.html" %}
+
+
+    <!-- Admin Content -->
+    <main class="w-full min-h-screen">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+
+    <!-- Shared Footer -->
+    {% include "components/footer.html" %}
+
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        if (typeof lucide !== "undefined") {
+            lucide.createIcons();
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+
+</html>

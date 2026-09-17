@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StitchSync{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0A192F',
+                        gold: '#D4AF37',
+                        'gold-soft': '#f4ecd0',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen font-sans">
+
+    <!-- Change this single line inside base/base.html -->
+    {% comment %} {% if '/customer/' in request.path or '/marketplace/' in request.path or '/measurements/' in request.path or '/cart/' in request.path or '/orders/' in request.path or '/chat/' in request.path or '/profiles/' in request.path or '/settings/' in request.path or '/checkout/' in request.path %}
+        {% include 'components/customer_header.html' %}
+    {% else %}
+        {% include 'components/header.html' %}
+    {% endif %} {% endcomment %}
+    {% include 'components/header.html' %}
+    <main class="flex-1 max-w-[1200px] w-full mx-auto px-4 py-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'components/footer.html' %}
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

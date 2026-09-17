@@ -1,0 +1,562 @@
+{% extends "adminpanel/base.html" %}
+
+{% block content %}
+
+<div class="report-page">
+
+    <div class="report-container">
+
+        <!-- ================= PAGE HEADER ================= -->
+
+        <div class="report-page-header">
+
+            <h1>
+                Reports
+            </h1>
+
+            <p>
+                Generate financial and performance reports.
+            </p>
+
+        </div>
+
+
+        <!-- ================= FILTER CARD ================= -->
+
+        <div class="report-card filter-card">
+
+            <form method="get">
+
+                <div class="filter-grid">
+
+                    <!-- Start Date -->
+                    <div class="form-group">
+
+                        <label for="start_date">
+                            Start Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="start_date"
+                            name="start_date"
+                            value="{{ start_date|date:'Y-m-d' }}"
+                        >
+
+                    </div>
+
+
+                    <!-- End Date -->
+                    <div class="form-group">
+
+                        <label for="end_date">
+                            End Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="end_date"
+                            name="end_date"
+                            value="{{ end_date|date:'Y-m-d' }}"
+                        >
+
+                    </div>
+
+
+                    <!-- Report Type -->
+                    <div class="form-group">
+
+                        <label for="report_type">
+                            Report Type
+                        </label>
+
+                        <select
+                            id="report_type"
+                            name="report_type"
+                        >
+
+                            <option value="Sales"
+                                {% if report_type == "Sales" %}selected{% endif %}>
+                                Sales
+                            </option>
+
+                            <option value="Revenue"
+                                {% if report_type == "Revenue" %}selected{% endif %}>
+                                Revenue
+                            </option>
+
+                            <option value="Orders"
+                                {% if report_type == "Orders" %}selected{% endif %}>
+                                Orders
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= ACTION BUTTONS ================= -->
+
+                <div class="report-actions">
+
+                    <button
+                        type="submit"
+                        class="primary-btn"
+                    >
+                        <span>▣</span>
+                        Generate Report
+                    </button>
+
+
+                    <a
+                        href="{% url 'adminpanel:export_revenue_csv' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}"
+                        class="secondary-btn"
+                    >
+                        <span>↓</span>
+                        Export CSV
+                    </a>
+
+
+                    <button
+                        type="button"
+                        onclick="window.print()"
+                        class="secondary-btn"
+                    >
+                        <span>▣</span>
+                        Download PDF
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- ================= REPORT PREVIEW ================= -->
+
+        <div class="report-card preview-card">
+
+            <div class="preview-header">
+
+                <div>
+
+                    <h2>
+                        Preview · {{ start_date|date:"F Y" }}
+                    </h2>
+
+                </div>
+
+                <span>
+                    {{ start_date|date:"d/m/Y" }}
+                    —
+                    {{ end_date|date:"d/m/Y" }}
+                </span>
+
+            </div>
+
+
+            <!-- ================= REPORT TABLE ================= -->
+
+            <div class="table-wrapper">
+
+                <table class="report-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Metric
+                            </th>
+
+                            <th class="value-column">
+                                Value
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <!-- GMV -->
+
+                        <tr>
+
+                            <td>
+                                Gross Merchandise Value
+                            </td>
+
+                            <td class="value-column strong">
+                                ${{ gross_merchandise_value|floatformat:2 }}
+                            </td>
+
+                        </tr>
+
+
+                        <!-- Net Revenue -->
+
+                        <tr>
+
+                            <td>
+                                Net Platform Revenue
+                            </td>
+
+                            <td class="value-column strong">
+                                ${{ net_platform_revenue|floatformat:2 }}
+                            </td>
+
+                        </tr>
+
+
+                        <!-- Total Orders -->
+
+                        <tr>
+
+                            <td>
+                                Total Orders
+                            </td>
+
+                            <td class="value-column strong">
+                                {{ total_orders }}
+                            </td>
+
+                        </tr>
+
+
+                        <!-- Active Shops -->
+
+                        <tr>
+
+                            <td>
+                                Active Shops
+                            </td>
+
+                            <td class="value-column strong">
+                                {{ active_shops }}
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* =========================================
+   PAGE
+========================================= */
+
+.report-page {
+    background: #f8f9fa;
+    min-height: calc(100vh - 80px);
+    padding: 32px 24px 60px;
+}
+
+.report-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.report-page-header {
+    margin-bottom: 28px;
+}
+
+.report-page-header h1 {
+    margin: 0;
+    color: #0a192f;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.report-page-header p {
+    margin: 8px 0 0;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.report-card {
+    background: #ffffff;
+    border: 1px solid #e2e6ea;
+    border-radius: 16px;
+    box-shadow: 0 2px 7px rgba(10, 25, 47, 0.04);
+}
+
+.filter-card {
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.preview-card {
+    padding: 24px;
+}
+
+
+/* =========================================
+   FILTER GRID
+========================================= */
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    color: #343a40;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid #d5dbe1;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #343a40;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+}
+
+
+/* =========================================
+   ACTION BUTTONS
+========================================= */
+
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.primary-btn,
+.secondary-btn {
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+    box-sizing: border-box;
+}
+
+.primary-btn {
+    border: 1px solid #0a192f;
+    background: #0a192f;
+    color: #ffffff;
+}
+
+.primary-btn:hover {
+    background: #122642;
+}
+
+.secondary-btn {
+    border: 1px solid #0a192f;
+    background: #ffffff;
+    color: #0a192f;
+}
+
+.secondary-btn:hover {
+    background: #f1f3f5;
+}
+
+
+/* =========================================
+   PREVIEW HEADER
+========================================= */
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.preview-header h2 {
+    margin: 0;
+    color: #0a192f;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.preview-header span {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+
+/* =========================================
+   TABLE
+========================================= */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.report-table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 15px 8px;
+    border-bottom: 1px solid #e8ebef;
+    font-size: 14px;
+}
+
+.report-table th {
+    color: #6c757d;
+    font-weight: 600;
+    text-align: left;
+}
+
+.report-table td {
+    color: #343a40;
+}
+
+.report-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.value-column {
+    text-align: right !important;
+}
+
+.strong {
+    color: #0a192f !important;
+    font-weight: 700;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .report-page {
+        padding: 24px 16px 40px;
+    }
+
+    .report-page-header h1 {
+        font-size: 30px;
+    }
+
+    .filter-card,
+    .preview-card {
+        padding: 18px;
+    }
+
+    .report-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================
+   PRINT
+========================================= */
+
+@media print {
+
+    header,
+    nav,
+    button,
+    form {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff !important;
+    }
+
+    .report-page {
+        min-height: auto !important;
+        padding: 20px !important;
+    }
+
+    .report-container {
+        max-width: 100% !important;
+    }
+
+}
+
+</style>
+
+{% endblock %}
