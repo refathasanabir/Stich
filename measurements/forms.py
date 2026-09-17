@@ -5,55 +5,28 @@ from customers.models import MeasurementProfile
 class MeasurementProfileForm(forms.ModelForm):
     class Meta:
         model = MeasurementProfile
-        fields = [
-            "name",
-            "relation",
-            "gender",
-            "category",
-            "chest",
-            "waist",
-            "shoulders",
-            "sleeve_length",
-            "collar",
-            "height",
-            "width",
-            "is_default",
-        ]
+        # We removed the hardcoded fields and replaced them with our JSON 'values' field
+        fields = ["name", "relation", "gender", "category", "values", "is_default"]
+
         widgets = {
             "name": forms.TextInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg"}
+                attrs={"class": "w-full rounded-lg border border-gray-300 px-3 py-2"}
             ),
             "relation": forms.Select(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg"}
+                attrs={"class": "w-full rounded-lg border border-gray-300 px-3 py-2"}
             ),
             "gender": forms.Select(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg"}
+                attrs={"class": "w-full rounded-lg border border-gray-300 px-3 py-2"}
             ),
             "category": forms.TextInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg"}
+                attrs={"class": "w-full rounded-lg border border-gray-300 px-3 py-2"}
             ),
-            "chest": forms.NumberInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg", "step": "0.01"}
+            "values": forms.Textarea(
+                attrs={
+                    "class": "w-full rounded-lg border border-gray-300 px-3 py-2",
+                    "rows": 4,
+                    "placeholder": '{"Chest": "40", "Shoulder": "18"}',
+                }
             ),
-            "waist": forms.NumberInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg", "step": "0.01"}
-            ),
-            "shoulders": forms.NumberInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg", "step": "0.01"}
-            ),
-            "sleeve_length": forms.NumberInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg", "step": "0.01"}
-            ),
-            "collar": forms.NumberInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg", "step": "0.01"}
-            ),
-            "height": forms.NumberInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg", "step": "0.01"}
-            ),
-            "width": forms.NumberInput(
-                attrs={"class": "w-full px-3 py-2 border rounded-lg", "step": "0.01"}
-            ),
-            "is_default": forms.CheckboxInput(
-                attrs={"class": "rounded border-gray-300 text-navy"}
-            ),
+            "is_default": forms.CheckboxInput(attrs={"class": "accent-navy h-4 w-4"}),
         }

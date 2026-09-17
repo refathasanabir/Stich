@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.contrib import messages
+from tailors.models import TailorShop
 
 from .models import Design, UserProfile
 from adminpanel.models import Approval
@@ -95,288 +96,127 @@ def login_view(request):
 # REGISTER
 # =========================================================
 
-def register_view(request):
+# Add this to your imports at the top!
 
-    # Already logged-in user
+# ... (keep your home, login_view, etc) ...
+
+
+def register_view(request):
     if request.user.is_authenticated:
         return redirect_based_on_role(request.user)
 
-
     if request.method == "POST":
-
-        # Get selected account type
         role = request.POST.get("role", "").strip()
-
 
         # =====================================================
         # TAILOR
         # =====================================================
-
         if role == "Tailor":
+            username = request.POST.get("username_tailor", "").strip()
+            email = request.POST.get("email_tailor", "").strip()
+            phone = request.POST.get("phone_tailor", "").strip()
+            password = request.POST.get("password_tailor", "")
+            shop_name = request.POST.get("shop_name", "").strip()
 
-            username = request.POST.get(
-                "username_tailor",
-                ""
-            ).strip()
+            if not username or not password or not email or not shop_name:
+                messages.error(request, "Please fill in all required Tailor fields.")
+                return render(request, "core/register.html")
 
-            email = request.POST.get(
-                "email_tailor",
-                ""
-            ).strip()
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "This username is already taken.")
+                return render(request, "core/register.html")
 
-            password = request.POST.get(
-                "password_tailor",
-                ""
-            )
-
-            shop_name = request.POST.get(
-                "shop_name",
-                ""
-            ).strip()
-
-
-            if not username or not password or not email:
-
-                messages.error(
-                    request,
-                    "Please fill in all required Tailor fields."
-                )
-
-                return render(
-                    request,
-                    "core/register.html"
-                )
-
-
-            # Check duplicate username
-            if User.objects.filter(
-                username=username
-            ).exists():
-
-                messages.error(
-                    request,
-                    "This username is already taken."
-                )
-
-                return render(
-                    request,
-                    "core/register.html"
-                )
-
-
-            # Create User
+            # 1. Create Base User
             user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password
+                username=username, email=email, password=password
             )
 
-
-            # Tailor Profile
+            # 2. Create UserProfile (with Pending status)
             UserProfile.objects.create(
                 user=user,
                 role="Tailor",
-                shop_name=shop_name
+                approval_status="Pending Approval",
+                phone=phone,
             )
 
+            # 3. Create linked TailorShop
+            TailorShop.objects.create(owner=user, name=shop_name)
 
-            # Pending Approval
-            Approval.objects.create(
-                user=user,
-                role="Tailor",
-                status="Pending"
-            )
-
-
-            # IMPORTANT:
-            # Do NOT login automatically.
             messages.success(
-                request,
-                "Tailor account created successfully. "
-                "Your account is waiting for admin approval. "
-                "Please login after approval."
+                request, "Tailor account created successfully! Awaiting Admin approval."
             )
-
             return redirect("core:login")
-
 
         # =====================================================
         # RIDER
         # =====================================================
-
         elif role == "Rider":
-
-            username = request.POST.get(
-                "username_rider",
-                ""
-            ).strip()
-
-            password = request.POST.get(
-                "password_rider",
-                ""
-            )
-
-            vehicle_type = request.POST.get(
-                "vehicle_type",
-                "Motorcycle"
-            )
-
+            username = request.POST.get("username_rider", "").strip()
+            phone = request.POST.get("phone_rider", "").strip()
+            password = request.POST.get("password_rider", "")
+            vehicle_type = request.POST.get("vehicle_type", "Motorcycle")
 
             if not username or not password:
+                messages.error(request, "Please fill in all required Rider fields.")
+                return render(request, "core/register.html")
 
-                messages.error(
-                    request,
-                    "Please fill in all required Rider fields."
-                )
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "This username is already taken.")
+                return render(request, "core/register.html")
 
-                return render(
-                    request,
-                    "core/register.html"
-                )
+            user = User.objects.create_user(username=username, password=password)
 
-
-            # Check duplicate username
-            if User.objects.filter(
-                username=username
-            ).exists():
-
-                messages.error(
-                    request,
-                    "This username is already taken."
-                )
-
-                return render(
-                    request,
-                    "core/register.html"
-                )
-
-
-            # Create User
-            user = User.objects.create_user(
-                username=username,
-                password=password
-            )
-
-
-            # Rider Profile
             UserProfile.objects.create(
                 user=user,
                 role="Rider",
-                vehicle_type=vehicle_type
+                approval_status="Pending Approval",
+                vehicle_type=vehicle_type,
+                phone=phone,
             )
 
-
-            # Pending Approval
-            Approval.objects.create(
-                user=user,
-                role="Rider",
-                status="Pending"
-            )
-
-
-            # Do NOT login automatically
             messages.success(
-                request,
-                "Rider account created successfully. "
-                "Your account is waiting for admin approval. "
-                "Please login after approval."
+                request, "Rider account created successfully! Awaiting Admin approval."
             )
-
             return redirect("core:login")
-
 
         # =====================================================
         # CUSTOMER
         # =====================================================
-
         elif role == "Customer":
-
-            username = request.POST.get(
-                "username",
-                ""
-            ).strip()
-
-            email = request.POST.get(
-                "email",
-                ""
-            ).strip()
-
-            password = request.POST.get(
-                "password",
-                ""
-            )
-
+            username = request.POST.get("username_customer", "").strip()
+            email = request.POST.get("email_customer", "").strip()
+            phone = request.POST.get("phone_customer", "").strip()
+            password = request.POST.get("password_customer", "")
 
             if not username or not password:
+                messages.error(request, "Please fill in all required Customer fields.")
+                return render(request, "core/register.html")
 
-                messages.error(
-                    request,
-                    "Please fill in all required Customer fields."
-                )
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "This username is already taken.")
+                return render(request, "core/register.html")
 
-                return render(
-                    request,
-                    "core/register.html"
-                )
-
-
-            # Check duplicate username
-            if User.objects.filter(
-                username=username
-            ).exists():
-
-                messages.error(
-                    request,
-                    "This username is already taken."
-                )
-
-                return render(
-                    request,
-                    "core/register.html"
-                )
-
-
-            # Create User
             user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password
+                username=username, email=email, password=password
             )
 
-
-            # Customer Profile
             UserProfile.objects.create(
                 user=user,
-                role="Customer"
+                role="Customer",
+                approval_status="Pending Approval",
+                phone=phone,
             )
 
-
-            # Do NOT login automatically
             messages.success(
                 request,
-                "Customer account created successfully. "
-                "Please login."
+                "Customer account created successfully! Awaiting Admin approval.",
             )
-
             return redirect("core:login")
 
-
-        # =====================================================
-        # INVALID ROLE
-        # =====================================================
-
         else:
+            messages.error(request, "Please select a valid account type.")
 
-            messages.error(
-                request,
-                "Please select a valid account type."
-            )
-
-
-    return render(
-        request,
-        "core/register.html"
-    )
+    return render(request, "core/register.html")
 
 
 # =========================================================
