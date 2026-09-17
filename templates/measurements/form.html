@@ -1,99 +1,237 @@
-{% extends 'base/base.html' %}
+{% extends 'customers/base.html' %}
+{% comment %} {% extends 'customers/base.html' %}
+{% load static %}
 
-{% block title %}Manage Measurements | StitchSync{% endblock %}
+{% block title %}{% if profile %}Edit Measurement Profile{% else %}Add Measurement Profile{% endif %} | StitchSync{% endblock %}
 
 {% block content %}
-<div class="max-w-[700px] mx-auto py-8 px-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+<div class="max-w-3xl mx-auto py-8 px-4">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-navy font-serif">
+            {% if profile %}Edit Measurement Profile{% else %}Add Measurement Profile{% endif %}
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">Provide your precise sizing specs in inches for custom tailoring.</p>
+    </div>
+
+    <form method="POST" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+        {% csrf_token %}
         
-        <div class="mb-6 border-b pb-4">
-            <h1 class="font-serif text-2xl font-bold text-navy">
-                {% if profile %}Edit Measurement Profile{% else %}Add Measurement Profile{% endif %}
-            </h1>
-            <p class="text-xs text-gray-500 mt-1">Provide your precise sizing specs in inches for custom tailoring.</p>
+        <!-- Top Info Grid -->
+        <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Profile Name</label>
+                <input type="text" name="name" value="{{ profile.name|default:'' }}" placeholder="e.g. My Custom Fit, Brother" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy" required>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Category (e.g. Suit, Panjabi)</label>
+                <input type="text" name="category" value="{{ profile.category|default:'' }}" placeholder="Panjabi" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy" required>
+            </div>
         </div>
 
-        <form method="POST" class="space-y-6">
-            {% csrf_token %}
-            
-            {% if form.non_field_errors %}
-                <div class="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <!-- General Settings Row -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Profile Name</label>
-                    {{ form.name }}
-                    <span class="text-xs text-red-500">{{ form.name.errors }}</span>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Category (e.g. Suit, Panjabi)</label>
-                    {{ form.category }}
-                    <span class="text-xs text-red-500">{{ form.category.errors }}</span>
-                </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Relation</label>
+                <select name="relation" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy">
+                    <option value="Self" {% if profile.relation == "Self" %}selected{% endif %}>Myself</option>
+                    <option value="Family" {% if profile.relation == "Family" %}selected{% endif %}>Family Member</option>
+                </select>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Relation</label>
-                    {{ form.relation }}
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Gender</label>
-                    {{ form.gender }}
-                </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Gender</label>
+                <select name="gender" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy">
+                    <option value="Male" {% if profile.gender == "Male" %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if profile.gender == "Female" %}selected{% endif %}>Female</option>
+                    <option value="Unisex" {% if profile.gender == "Unisex" %}selected{% endif %}>Unisex</option>
+                </select>
             </div>
+        </div>
 
-            <hr class="border-gray-100 my-4">
-
-            <h3 class="font-bold text-sm text-navy uppercase tracking-wider mb-3">Sizing Specifications (Inches)</h3>
+        <!-- Sizing Specifications Section -->
+        <div class="border-t border-gray-100 pt-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate mb-4">Sizing Specifications (Inches)</h3>
             
-            <!-- Dynamic Measurement Inputs -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Chest</label>
-                    {{ form.chest }}
+                    <label class="block text-xs text-gray-600 mb-1">Chest</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_chest" value="{{ profile.values.Chest|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Waist</label>
-                    {{ form.waist }}
+                    <label class="block text-xs text-gray-600 mb-1">Waist</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_waist" value="{{ profile.values.Waist|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Shoulders</label>
-                    {{ form.shoulders }}
+                    <label class="block text-xs text-gray-600 mb-1">Shoulders</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_shoulders" value="{{ profile.values.Shoulders|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Sleeve Length</label>
-                    {{ form.sleeve_length }}
+                    <label class="block text-xs text-gray-600 mb-1">Sleeve Length</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_sleeve_length" value="{{ profile.values.Sleeve Length|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Collar</label>
-                    {{ form.collar }}
+                    <label class="block text-xs text-gray-600 mb-1">Collar</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_collar" value="{{ profile.values.Collar|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Height</label>
-                    {{ form.height }}
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Width</label>
-                    {{ form.width }}
+                    <label class="block text-xs text-gray-600 mb-1">Length</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_length" value="{{ profile.values.Length|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="flex items-center gap-2 pt-2">
-                {{ form.is_default }}
-                <label class="text-sm text-gray-700 font-medium">Set as default measurement profile</label>
-            </div>
+        <!-- Default Checkbox -->
+        <div class="border-t border-gray-100 pt-4">
+            <label class="flex items-center gap-2 text-sm text-charcoal cursor-pointer">
+                <input type="checkbox" name="is_default" {% if profile.is_default %}checked{% endif %} class="accent-navy h-4 w-4 rounded"> 
+                Set as default measurement profile
+            </label>
+            <p class="text-xs text-gray-400 mt-1">Enter exact body measurements without allowance — the tailor adjusts for ease and fit.</p>
+        </div>
 
-            <div class="flex items-center justify-end gap-3 pt-4 border-t">
-                <a href="{% url 'customers:profiles' %}" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition">Cancel</a>
-                <button type="submit" class="px-6 py-2 bg-navy text-white text-sm font-medium rounded-xl hover:bg-slate-800 transition">Save Profile</button>
-            </div>
-        </form>
+        <!-- Form Actions -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+            <a href="{% url 'customers:profiles' %}" class="px-5 py-2.5 text-sm font-medium text-gray-500 hover:text-navy">Cancel</a>
+            <button type="submit" class="px-6 py-2.5 bg-navy text-white text-sm font-medium rounded-xl hover:bg-slate-800 transition shadow-sm">
+                {% if profile %}Update Profile{% else %}Save Profile{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} {% endcomment %}
 
+
+
+
+
+{% load static %}
+
+{% block title %}{% if profile %}Edit Measurement Profile{% else %}Add Measurement Profile{% endif %} | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-8 px-4">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-navy font-serif">
+            {% if profile %}Edit Measurement Profile{% else %}Add Measurement Profile{% endif %}
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">Provide your precise sizing specs in inches for custom tailoring.</p>
     </div>
+
+    <form method="POST" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+        {% csrf_token %}
+        
+        <!-- Top Info Grid -->
+        <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Profile Name</label>
+                <input type="text" name="name" value="{{ profile.name|default:'' }}" placeholder="e.g. My Custom Fit, Brother" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy" required>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Category (e.g. Suit, Panjabi)</label>
+                <input type="text" name="category" value="{{ profile.category|default:'' }}" placeholder="Panjabi" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy" required>
+            </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Relation</label>
+                <select name="relation" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy">
+                    <option value="Self" {% if profile.relation == "Self" %}selected{% endif %}>Myself</option>
+                    <option value="Family" {% if profile.relation == "Family" %}selected{% endif %}>Family Member</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Gender</label>
+                <select name="gender" class="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:border-navy">
+                    <option value="Male" {% if profile.gender == "Male" %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if profile.gender == "Female" %}selected{% endif %}>Female</option>
+                    <option value="Unisex" {% if profile.gender == "Unisex" %}selected{% endif %}>Unisex</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Sizing Specifications Section -->
+        <div class="border-t border-gray-100 pt-6">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate mb-4">Sizing Specifications (Inches)</h3>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs text-gray-600 mb-1">Chest</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_chest" value="{{ profile.values.chest|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-600 mb-1">Waist</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_waist" value="{{ profile.values.waist|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-600 mb-1">Shoulders</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_shoulders" value="{{ profile.values.shoulders|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-600 mb-1">Sleeve Length</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_sleeve_length" value="{{ profile.values.sleeve_length|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-600 mb-1">Collar</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_collar" value="{{ profile.values.collar|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-600 mb-1">Length</label>
+                    <div class="flex items-center h-11 border border-gray-200 rounded-xl bg-white px-3 focus-within:border-navy">
+                        <input type="text" name="measure_length" value="{{ profile.values.length|default:'' }}" placeholder="0.0" class="w-full outline-none text-sm">
+                        <span class="text-gray-400 text-xs">in</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Default Checkbox -->
+        <div class="border-t border-gray-100 pt-4">
+            <label class="flex items-center gap-2 text-sm text-charcoal cursor-pointer">
+                <input type="checkbox" name="is_default" {% if profile.is_default %}checked{% endif %} class="accent-navy h-4 w-4 rounded"> 
+                Set as default measurement profile
+            </label>
+            <p class="text-xs text-gray-400 mt-1">Enter exact body measurements without allowance — the tailor adjusts for ease and fit.</p>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+            <a href="{% url 'customers:profiles' %}" class="px-5 py-2.5 text-sm font-medium text-gray-500 hover:text-navy">Cancel</a>
+            <button type="submit" class="px-6 py-2.5 bg-navy text-white text-sm font-medium rounded-xl hover:bg-slate-800 transition shadow-sm">
+                {% if profile %}Update Profile{% else %}Save Profile{% endif %}
+            </button>
+        </div>
+    </form>
 </div>
 {% endblock %}

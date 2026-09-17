@@ -48,7 +48,7 @@
                 
                 <!-- Smart Action Button -->
                 {% if request.user.is_authenticated or '/customer/' in request.path %}
-                    <a href="{% url 'customers:add_to_cart' d.id %}" class="px-4 py-2 bg-navy text-white text-xs font-medium rounded-xl hover:bg-slate-800 transition">Order</a>
+                    <a href="{% url 'customers:checkout' d.id %}" class="px-4 py-2 bg-navy text-white text-xs font-medium rounded-xl hover:bg-slate-800 transition">Order</a>
                 {% else %}
                     <a href="{% url 'core:login' %}" class="px-4 py-2 bg-navy text-white text-xs font-medium rounded-xl hover:bg-slate-800 transition">Order</a>
                 {% endif %}

@@ -1,0 +1,33 @@
+{% extends 'customers/base.html' %}
+{% load static %}
+
+{% block title %}Order Successful | StitchSync{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto text-center py-16">
+    <div class="h-20 w-20 rounded-full bg-green-100 text-green-600 grid place-items-center mx-auto shadow-sm">
+        <i data-lucide="check-circle" class="w-10 h-10"></i>
+    </div>
+    
+    <h1 class="text-navy text-2xl font-bold font-serif mt-6">Order Placed Successfully!</h1>
+    <p class="text-gray-500 text-sm mt-2">
+        Your order <span class="font-bold text-navy">{{ order.order_id }}</span> has been sent to <strong>{{ order.shop_name }}</strong>.
+    </p>
+
+    {% if order.fabric_source == 'own' %}
+        <div class="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-900 text-left flex items-start gap-2">
+            <span>🚚</span>
+            <span>A fabric pickup request has been automatically generated for a rider to collect your fabric from your address.</span>
+        </div>
+    {% endif %}
+
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+        <a href="{% url 'customers:orders' %}" class="py-3 px-6 bg-navy text-white text-sm font-medium rounded-xl hover:bg-slate-800 transition shadow-sm">
+            View My Orders
+        </a>
+        <a href="{% url 'core:marketplace' %}" class="py-3 px-6 bg-white border border-gray-200 text-navy text-sm font-medium rounded-xl hover:bg-gray-50 transition">
+            Back to Marketplace
+        </a>
+    </div>
+</div>
+{% endblock %}

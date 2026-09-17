@@ -9,39 +9,56 @@
     <p class="text-gray-500 text-sm mt-1">Review your custom tailoring items before checkout.</p>
 </div>
 
-<div class="grid lg:grid-cols-3 gap-8">
-    <div class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Cart Items (1)</h3>
-        
-        <div class="flex items-center gap-4 py-3">
-            <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Panjabi" class="w-20 h-20 object-cover rounded-xl border border-gray-200">
-            <div class="flex-1">
-                <h4 class="font-bold text-navy">Embroidered Panjabi</h4>
-                <p class="text-xs text-gray-500 mt-1">Shop: Heritage Stitch · Profile: My Custom Fit</p>
-                <div class="font-bold text-navy mt-2">$63.00</div>
+{% if cart_items %}
+<form method="POST" action="{% url 'customers:checkout' %}">
+    {% csrf_token %}
+    <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Cart Items List -->
+        <div class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Cart Items ({{ cart_items|length }})</h3>
+            
+            {% for item in cart_items %}
+            <div class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
+                {% if item.image_url %}
+                    <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="w-20 h-20 object-cover rounded-xl border border-gray-200">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Default Design" class="w-20 h-20 object-cover rounded-xl border border-gray-200">
+                {% endif %}
+                
+                <div class="flex-1">
+                    <h4 class="font-bold text-navy">{{ item.product_name }}</h4>
+                    <p class="text-xs text-gray-500 mt-1">Shop: {{ item.shop_name }} · Quantity: {{ item.quantity }}</p>
+                    <div class="font-bold text-navy mt-2">${{ item.price }}</div>
+                </div>
             </div>
-            <button class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" title="Remove item">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
+            {% endfor %}
         </div>
-    </div>
 
-    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm h-fit">
-        <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Order Summary</h3>
-        <div class="flex justify-between text-sm text-gray-600 mb-3">
-            <span>Subtotal</span>
-            <span class="font-bold text-navy">$63.00</span>
+        <!-- Order Summary Sidebar -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm h-fit sticky top-6">
+            <h3 class="text-navy font-bold text-base border-b border-gray-200 pb-4 mb-4">Order Summary</h3>
+            <div class="flex justify-between text-sm text-gray-600 mb-3">
+                <span>Subtotal</span>
+                <span class="font-bold text-navy">${{ total }}</span>
+            </div>
+            <div class="flex justify-between text-sm text-gray-600 mb-4">
+                <span>Pickup & Delivery</span>
+                <span class="font-bold text-navy">$5.00</span>
+            </div>
+            <hr class="border-gray-200 my-4">
+            <div class="flex justify-between text-base font-bold text-navy mb-6">
+                <span>Total</span>
+                <span>${{ total|add:5.00 }}</span>
+            </div>
+            <button type="submit" class="block w-full py-3 bg-navy text-white text-center rounded-xl font-medium hover:bg-slate-800 transition shadow-sm">Proceed to Checkout</button>
         </div>
-        <div class="flex justify-between text-sm text-gray-600 mb-4">
-            <span>Pickup & Delivery</span>
-            <span class="font-bold text-navy">$5.00</span>
-        </div>
-        <hr class="border-gray-200 my-4">
-        <div class="flex justify-between text-base font-bold text-navy mb-6">
-            <span>Total</span>
-            <span>$68.00</span>
-        </div>
-        <a href="{% url 'customers:checkout' %}" class="block w-full py-3 bg-navy text-white text-center rounded-xl font-medium hover:bg-slate-800 transition">Proceed to Checkout</a>
     </div>
+</form>
+{% else %}
+<div class="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
+    <h3 class="text-navy font-bold text-lg mb-2">Your cart is empty</h3>
+    <p class="text-gray-500 text-sm mb-6">Explore our marketplace gallery and add some custom designs to your cart.</p>
+    <a href="{% url 'core:marketplace' %}" class="inline-block py-3 px-6 bg-navy text-white rounded-xl font-medium hover:bg-slate-800 transition">Browse Marketplace</a>
 </div>
+{% endif %}
 {% endblock %}

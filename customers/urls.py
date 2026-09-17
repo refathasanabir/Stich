@@ -22,4 +22,5 @@ urlpatterns = [
     path("notifications/", views.customer_notifications, name="notifications"),
     path("settings/", views.customer_settings, name="settings"),
     path("chat/", views.customer_chat, name="chat"),
+    path("checkout/<int:design_id>/", views.checkout, name="checkout"),
 ]
