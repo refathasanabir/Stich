@@ -24,6 +24,9 @@ class UserProfile(models.Model):
 
     # Rider specific (Shop specific fields will move to the tailors app)
     vehicle_type = models.CharField(max_length=50, blank=True, null=True)
+    driving_license = models.FileField(
+            upload_to="private/rider_licenses/", blank=True, null=True
+        )
 
     def __str__(self):
         return f"{self.user.username} - {self.role} ({self.approval_status})"
@@ -55,8 +58,7 @@ class Design(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=5.0)
     image = models.ImageField(upload_to="designs/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         return f"{self.title} - {self.shop}"
-
-

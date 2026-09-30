@@ -47,29 +47,29 @@ class DesignCustomizationOption(models.Model):
         return f"{self.product_name} ({self.shop_name})"
 
 
-class CartItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product_name = models.CharField(max_length=150)
-    shop_name = models.CharField(max_length=150)
+# class CartItem(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     product_name = models.CharField(max_length=150)
+#     shop_name = models.CharField(max_length=150)
 
-    # Granular price storage to prevent recalculation drift
-    base_price = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    fabric_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    trial_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    delivery_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    price = models.DecimalField(max_digits=8, decimal_places=2)  # Total item price
+#     # Granular price storage to prevent recalculation drift
+#     base_price = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+#     fabric_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+#     trial_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+#     delivery_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+#     price = models.DecimalField(max_digits=8, decimal_places=2)  # Total item price
 
-    quantity = models.PositiveIntegerField(default=1)
-    image_url = models.URLField(blank=True, null=True)
+#     quantity = models.PositiveIntegerField(default=1)
+#     image_url = models.URLField(blank=True, null=True)
 
-    fabric_source = models.CharField(max_length=10, default="shop")
-    pickup_address = models.TextField(blank=True, null=True)
-    trial_requested = models.BooleanField(default=False)
-    measurement_profile = models.ForeignKey(
-        MeasurementProfile, on_delete=models.SET_NULL, null=True, blank=True
-    )
+#     fabric_source = models.CharField(max_length=10, default="shop")
+#     pickup_address = models.TextField(blank=True, null=True)
+#     trial_requested = models.BooleanField(default=False)
+#     measurement_profile = models.ForeignKey(
+#         MeasurementProfile, on_delete=models.SET_NULL, null=True, blank=True
+#     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Order(models.Model):

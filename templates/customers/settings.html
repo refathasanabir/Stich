@@ -13,13 +13,13 @@
   </div>
 
   <!-- Messages Alert -->
-  {% if messages %}
+  {% comment %} {% if messages %}
     {% for message in messages %}
       <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-2">
         <span>✅</span> {{ message }}
       </div>
     {% endfor %}
-  {% endif %}
+  {% endif %} {% endcomment %}
 
   <!-- Settings Form Wrapper -->
   <form method="POST" class="space-y-6">

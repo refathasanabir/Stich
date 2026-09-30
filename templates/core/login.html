@@ -1,152 +1,230 @@
-{% extends 'base/base.html' %} {% load static %} {% block title %}Login |
-Stitch{% endblock %} {% block content %}
-<div class="max-w-4xl mx-auto py-8 px-4">
-  <div
-    class="grid lg:grid-cols-2 rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm"
-  >
-    <!-- Left Side Banner -->
-    <div class="relative hidden lg:block min-h-[560px]">
+
+{% extends "base/base.html" %}
+
+{% block title %}Login | StitchSync{% endblock %}
+
+{% block content %}
+
+<div class="max-w-[850px] mx-auto">
+  <div class="grid lg:grid-cols-2 overflow-hidden rounded-2xl
+              border border-gray-200 bg-white shadow-sm">
+
+    <!-- LEFT PANEL -->
+    <aside class="relative hidden lg:flex min-h-[435px]
+                  flex-col justify-between p-9 text-white bg-navy">
+
       <img
         src="https://images.unsplash.com/photo-1593030103066-0093718efeb9"
-        alt="Tailoring"
-        class="absolute inset-0 w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-navy/70"></div>
-      <div
-        class="absolute inset-0 p-12 flex flex-col justify-between text-white"
+        alt="Tailoring workshop"
+        class="absolute inset-0 h-full w-full object-cover"
       >
-        <span class="font-serif font-bold text-xl tracking-wide text-white"
-          >Stitch</span
-        >
-        <div>
-          <h2 class="text-white text-3xl font-bold font-serif">
-            Craft that fits your life.
-          </h2>
-          <p class="text-white/70 mt-3 text-sm max-w-sm">
-            Log in to manage your orders, measurements and chats.
-          </p>
-        </div>
-      </div>
-    </div>
 
-    <!-- Right Side Form -->
-    <div class="p-8 sm:p-12 flex flex-col justify-center">
-      <h1 class="text-navy text-2xl font-bold font-serif">Welcome back</h1>
-      <p class="text-gray-500 text-sm mt-1 mb-5">
-        Log in to your Stitch account.
+      <div class="absolute inset-0 bg-[#0A192F]/80"></div>
+
+      <div class="relative flex items-center gap-2
+                  font-serif text-xl font-bold">
+        <i data-lucide="scissors" class="h-6 w-6 text-gold"></i>
+        StitchSync
+      </div>
+
+      <div class="relative">
+        <h2 class="font-serif text-[30px] font-semibold leading-tight">
+          Craft that fits your life.
+        </h2>
+
+        <p class="mt-3 max-w-xs text-sm text-white/70">
+          Log in to manage your orders, measurements and chats.
+        </p>
+      </div>
+
+    </aside>
+
+
+    <!-- LOGIN FORM -->
+    <section class="flex flex-col justify-center p-7 sm:p-9">
+
+      <h1 class="font-serif text-[28px] font-bold text-navy">
+        Welcome back
+      </h1>
+
+      <p class="mt-1 mb-5 text-sm text-gray-500">
+        Log in to your StitchSync account.
       </p>
 
-      <!-- Role Selector Tabs -->
-      <!-- Role Selector Tabs -->
+
+      <!-- ROLE TABS -->
       <div class="grid grid-cols-4 gap-2 mb-5">
-        <button
-          type="button"
-          onclick="setLoginRole('Customer')"
-          id="login-btn-Customer"
-          class="h-10 rounded-xl border text-xs font-semibold transition-colors border-navy bg-navy text-white"
-        >
+
+        <button type="button" data-role="Customer"
+                onclick="setLoginRole('Customer')"
+                class="login-tab rounded-lg border py-2 text-xs">
           Customer
         </button>
-        <button
-          type="button"
-          onclick="setLoginRole('Tailor')"
-          id="login-btn-Tailor"
-          class="h-10 rounded-xl border text-xs font-semibold transition-colors border-gray-200 text-gray-700 hover:border-navy"
-        >
+
+        <button type="button" data-role="Tailor"
+                onclick="setLoginRole('Tailor')"
+                class="login-tab rounded-lg border py-2 text-xs">
           Tailor
         </button>
-        <button
-          type="button"
-          onclick="setLoginRole('Rider')"
-          id="login-btn-Rider"
-          class="h-10 rounded-xl border text-xs font-semibold transition-colors border-gray-200 text-gray-700 hover:border-navy"
-        >
+
+        <button type="button" data-role="Rider"
+                onclick="setLoginRole('Rider')"
+                class="login-tab rounded-lg border py-2 text-xs">
           Rider
         </button>
-        <button
-          type="button"
-          onclick="setLoginRole('Admin')"
-          id="login-btn-Admin"
-          class="h-10 rounded-xl border text-xs font-semibold transition-colors border-gray-200 text-gray-700 hover:border-navy"
-        >
+
+        <button type="button" data-role="Admin"
+                onclick="setLoginRole('Admin')"
+                class="login-tab rounded-lg border py-2 text-xs">
           Admin
         </button>
+
       </div>
+
+
+      {% for message in messages %}
+        <div class="mb-3 rounded-lg border p-2.5 text-xs
+          {% if message.tags == 'success' %}
+            border-green-200 bg-green-50 text-green-700
+          {% else %}
+            border-red-200 bg-red-50 text-red-700
+          {% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+
 
       <form method="POST" class="space-y-4">
         {% csrf_token %}
-        <input type="hidden" name="role" id="login_role" value="Customer" />
 
-        {% if form.errors %}
-        <div
-          class="bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl text-xs"
-        >
-          Your credentials didn't match. Please try again.
+        <input type="hidden"
+               name="role"
+               id="login-role"
+               value="{{ selected_role|default:'Customer' }}">
+
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">
+            Email
+          </label>
+
+          <input
+            type="text"
+            name="identifier"
+            value="{{ identifier|default:'' }}"
+            autocomplete="username"
+            placeholder="you@example.com"
+            required
+            class="w-full rounded-lg border border-gray-200
+                   px-3 py-2.5 text-sm outline-none
+                   focus:border-navy"
+          >
         </div>
-        {% endif %}
 
-        <div class="space-y-4 mb-6">
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1"
-              >Email / Username</label
-            >
-            <input
-              type="text"
-              name="username"
-              required
-              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm"
-              placeholder="you@example.com"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1"
-              >Password</label
-            >
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700">
+            Password
+          </label>
+
+          <div class="relative">
+
             <input
               type="password"
               name="password"
+              id="login-password"
+              autocomplete="current-password"
+              placeholder="Enter your password"
               required
-              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm"
-              placeholder="••••••••"
-            />
+              class="w-full rounded-lg border border-gray-200
+                     px-3 py-2.5 pr-11 text-sm outline-none
+                     focus:border-navy"
+            >
+
+            <button type="button"
+                    onclick="toggleLoginPassword()"
+                    aria-label="Show or hide password"
+                    class="absolute right-3 top-1/2
+                           -translate-y-1/2 text-gray-400
+                           hover:text-navy">
+
+              <i id="password-icon"
+                 data-lucide="eye"
+                 class="h-4 w-4"></i>
+
+            </button>
+
           </div>
         </div>
 
-        <button
-          type="submit"
-          id="login-submit-btn"
-          class="w-full py-3 bg-navy text-white rounded-xl font-medium hover:bg-slate-800 transition"
-        >
+
+        <button type="submit"
+                id="login-submit"
+                class="w-full rounded-lg bg-navy py-2.5
+                       text-sm font-semibold text-white
+                       hover:bg-slate-800 transition">
+
           Log In as Customer
+
         </button>
       </form>
 
-      <p class="text-xs text-gray-500 text-center mt-6">
+
+      <p class="mt-5 text-center text-xs text-gray-500">
         New here?
-        <a
-          href="{% url 'core:register' %}"
-          class="text-navy font-bold hover:underline"
-          >Create an account</a
-        >
+        <a href="{% url 'core:register' %}"
+           class="font-bold text-navy hover:underline">
+          Create an account
+        </a>
       </p>
-    </div>
+
+    </section>
   </div>
 </div>
 
+
 <script>
-  function setLoginRole(role) {
-    document.getElementById("login_role").value = role;
-    ["Customer", "Tailor", "Rider", "Admin"].forEach((r) => {
-      const btn = document.getElementById("login-btn-" + r);
-      if (r === role) {
-        btn.className =
-          "h-10 rounded-xl border text-xs font-semibold transition-colors border-navy bg-navy text-white";
-      } else {
-        btn.className =
-          "h-10 rounded-xl border text-xs font-semibold transition-colors border-gray-200 text-gray-700 hover:border-navy";
-      }
+function setLoginRole(role) {
+    document.getElementById("login-role").value = role;
+
+    document.querySelectorAll(".login-tab").forEach(button => {
+        const active = button.dataset.role === role;
+
+        button.className = active
+            ? "login-tab rounded-lg border border-navy " +
+              "bg-navy py-2 text-xs font-semibold text-white"
+            : "login-tab rounded-lg border border-gray-200 " +
+              "py-2 text-xs text-gray-600 hover:border-navy";
     });
-    document.getElementById("login-submit-btn").innerText = "Log In as " + role;
-  }
+
+    document.getElementById("login-submit").textContent =
+        "Log In as " + role;
+}
+
+
+function toggleLoginPassword() {
+    const input = document.getElementById("login-password");
+    const icon = document.getElementById("password-icon");
+
+    input.type =
+        input.type === "password" ? "text" : "password";
+
+    icon.setAttribute(
+        "data-lucide",
+        input.type === "password" ? "eye" : "eye-off"
+    );
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    setLoginRole(
+        document.getElementById("login-role").value || "Customer"
+    );
+});
 </script>
+
 {% endblock %}

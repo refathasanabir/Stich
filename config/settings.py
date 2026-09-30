@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tailors_db', 
         'USER': 'root',                
-        'PASSWORD': '1234',   
+        'PASSWORD': 'root',   
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
@@ -144,4 +144,4 @@ MAILERS = {
 # Tells Django where to redirect users when @login_required blocks them
 LOGIN_URL = "core:login"
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")

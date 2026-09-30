@@ -1,154 +1,473 @@
-{% extends 'base/base.html' %}
+
+{% extends "base/base.html" %}
 {% load static %}
 
-{% block title %}Register | StitchSync{% endblock %}
+{% block title %}Sign Up | StitchSync{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-8 px-4">
-    <div class="grid lg:grid-cols-2 rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm">
-        
-        <!-- Left Side Banner -->
-        <div class="relative hidden lg:block min-h-[560px]">
-            <img src="https://images.unsplash.com/photo-1593030103066-0093718efeb9" alt="Tailoring" class="absolute inset-0 w-full h-full object-cover">
-            <div class="absolute inset-0 bg-navy/70"></div>
-            <div class="absolute inset-0 p-12 flex flex-col justify-between text-white">
-                <span class="font-serif font-bold text-xl tracking-wide text-white">StitchSync</span>
-                <div>
-                    <h2 class="text-white text-3xl font-bold font-serif">Craft that fits your life.</h2>
-                    <p class="text-white/70 mt-3 text-sm max-w-sm">Join thousands ordering bespoke garments from trusted tailors.</p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Right Side Form -->
-        <div class="p-8 sm:p-12 flex flex-col justify-center">
-            <h1 class="text-navy text-2xl font-bold font-serif">Create your account</h1>
-            <p class="text-gray-500 text-sm mt-1 mb-5">Choose how you'd like to join.</p>
+<div class="max-w-[900px] mx-auto py-3">
 
-            <!-- Role Selector Tabs -->
-            <div id="role-tabs" class="grid grid-cols-3 gap-2 mb-6">
-                <button type="button" onclick="setRole('Customer')" id="btn-Customer" class="h-10 rounded-xl border text-xs font-semibold transition-colors border-navy bg-navy text-white">Customer</button>
-                <button type="button" onclick="setRole('Tailor')" id="btn-Tailor" class="h-10 rounded-xl border text-xs font-semibold transition-colors border-gray-200 text-gray-700 hover:border-navy">Tailor</button>
-                <button type="button" onclick="setRole('Rider')" id="btn-Rider" class="h-10 rounded-xl border text-xs font-semibold transition-colors border-gray-200 text-gray-700 hover:border-navy">Rider</button>
-            </div>
+  <div class="grid lg:grid-cols-2 rounded-2xl overflow-hidden
+              border border-gray-200 bg-white shadow-sm">
 
-            <form method="POST" enctype="multipart/form-data" class="space-y-4">
-                {% csrf_token %}
-                <input type="hidden" name="role" id="id_role" value="Customer">
+    <!-- LEFT PHOTO -->
+    <div class="relative hidden lg:flex flex-col justify-between
+                min-h-[560px] p-10 bg-navy text-white">
 
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="p-3 rounded-xl text-xs {% if message.tags == 'error' %}bg-red-50 text-red-600 border border-red-200{% else %}bg-green-50 text-green-600 border border-green-200{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
+      <img
+        src="https://images.unsplash.com/photo-1593030103066-0093718efeb9?auto=format&fit=crop&w=900&q=85"
+        alt="Tailoring workshop"
+        class="absolute inset-0 h-full w-full object-cover"
+      >
 
-                <!-- Dynamic Fields Container -->
-                <div class="space-y-4 mb-6">
-                    
-                    <!-- Customer Fields -->
-                    <div class="role-fields" data-role="Customer">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
-                            <input type="text" name="username_customer" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="John Doe">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Email Address</label>
-                            <input type="email" name="email_customer" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="you@example.com">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-                            <input type="text" name="phone_customer" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="+880 1700 000000">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
-                            <input type="password" name="password_customer" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="••••••••">
-                        </div>
-                    </div>
+      <div class="absolute inset-0 bg-[#0A192F]/80"></div>
 
-                    <!-- Tailor Fields -->
-                    <div class="role-fields hidden" data-role="Tailor">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Shop Name</label>
-                            <input type="text" name="shop_name" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="Regal Tailors">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Owner Name (Username)</label>
-                            <input type="text" name="username_tailor" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="Karim Ahmed">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Email Address</label>
-                            <input type="email" name="email_tailor" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="shop@example.com">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-                            <input type="text" name="phone_tailor" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="+880 1700 000000">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
-                            <input type="password" name="password_tailor" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="••••••••">
-                        </div>
-                    </div>
+      <a href="{% url 'core:home' %}"
+         class="relative z-10 flex items-center gap-2">
 
-                    <!-- Rider Fields -->
-                    <div class="role-fields hidden" data-role="Rider">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Full Name (Username)</label>
-                            <input type="text" name="username_rider" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="Rider name">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Vehicle Type</label>
-                            <select name="vehicle_type" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm bg-white">
-                                <option value="Motorcycle">Motorcycle</option>
-                                <option value="Bicycle">Bicycle</option>
-                                <option value="Car">Car</option>
-                            </select>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-                            <input type="text" name="phone_rider" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="+880 1700 000000">
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
-                            <input type="password" name="password_rider" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-navy text-sm" placeholder="••••••••">
-                        </div>
-                    </div>
-                </div>
+        <span class="w-8 h-8 rounded-lg bg-gold text-navy
+                     flex items-center justify-center">
+          <i data-lucide="scissors" class="w-4 h-4"></i>
+        </span>
 
-                <button type="submit" class="w-full py-3 bg-navy text-white rounded-xl font-medium hover:bg-slate-800 transition">Create Account</button>
-                <p class="text-[13px] text-gray-500 text-center mt-3 flex items-center justify-center gap-1">
-                    <i data-lucide="check" class="w-4 h-4 text-green-500"></i> Your account will be reviewed by an admin.
-                </p>
-            </form>
+        <span class="font-serif text-xl font-bold">
+          StitchSync
+        </span>
+      </a>
 
-            <p class="text-xs text-gray-500 text-center mt-6">
-                Already have an account? <a href="{% url 'core:login' %}" class="text-navy font-bold hover:underline">Log in</a>
-            </p>
-        </div>
+      <div class="relative z-10">
+
+        <h2 class="font-serif text-3xl font-bold leading-tight">
+          Craft that fits your life.
+        </h2>
+
+        <p class="mt-3 text-sm leading-relaxed text-white/75">
+          Join thousands ordering bespoke garments
+          from trusted tailors.
+        </p>
+
+      </div>
     </div>
+
+
+    <!-- RIGHT FORM -->
+    <div class="px-7 py-8 sm:px-10">
+
+      <h1 class="font-serif text-[28px] font-bold text-navy">
+        Create your account
+      </h1>
+
+      <p class="text-sm text-gray-500 mt-1 mb-5">
+        Choose how you'd like to join.
+      </p>
+
+
+      <!-- ROLE BUTTONS -->
+      <div class="grid grid-cols-3 gap-2 mb-5">
+
+        <button type="button" data-role="Customer"
+                onclick="chooseRole('Customer')"
+                class="role-button rounded-lg border py-2 text-xs">
+          Customer
+        </button>
+
+        <button type="button" data-role="Tailor"
+                onclick="chooseRole('Tailor')"
+                class="role-button rounded-lg border py-2 text-xs">
+          Tailor
+        </button>
+
+        <button type="button" data-role="Rider"
+                onclick="chooseRole('Rider')"
+                class="role-button rounded-lg border py-2 text-xs">
+          Rider
+        </button>
+
+      </div>
+
+
+      <!-- BACKEND MESSAGES -->
+      {% for message in messages %}
+        <div class="mb-3 p-3 rounded-lg border text-xs
+          {% if message.tags == 'success' %}
+            bg-green-50 border-green-200 text-green-700
+          {% else %}
+            bg-red-50 border-red-200 text-red-700
+          {% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+
+
+      <form method="POST"
+            action="{% url 'core:register' %}"
+            enctype="multipart/form-data"
+            class="space-y-3.5">
+
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="role"
+               id="registration-role"
+               value="{{ selected_role|default:'Customer' }}">
+
+
+        <!-- TAILOR: SHOP NAME -->
+        <div id="shop-field" class="hidden">
+
+          <label for="shop_name"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Shop Name
+          </label>
+
+          <input type="text"
+                 id="shop_name"
+                 name="shop_name"
+                 value="{{ request.POST.shop_name }}"
+                 placeholder="Regal Tailors"
+                 disabled
+                 class="w-full h-10 px-3 rounded-lg border
+                        border-gray-200 text-sm outline-none
+                        focus:border-navy">
+        </div>
+
+
+        <!-- FULL NAME -->
+        <div>
+
+          <label for="full_name"
+                 id="name-label"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Full Name
+          </label>
+
+          <input type="text"
+                 name="full_name"
+                 id="full_name"
+                 value="{{ request.POST.full_name }}"
+                 placeholder="John Doe"
+                 autocomplete="name"
+                 required
+                 class="w-full h-10 px-3 rounded-lg border
+                        border-gray-200 text-sm outline-none
+                        focus:border-navy">
+        </div>
+
+
+        <!-- EMAIL -->
+        <div>
+
+          <label for="email"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Email Address
+          </label>
+
+          <input type="email"
+                 name="email"
+                 id="email"
+                 value="{{ request.POST.email }}"
+                 placeholder="you@example.com"
+                 autocomplete="email"
+                 required
+                 class="w-full h-10 px-3 rounded-lg border
+                        border-gray-200 text-sm outline-none
+                        focus:border-navy">
+        </div>
+
+
+        <!-- PHONE -->
+        <div>
+
+          <label for="phone"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Phone Number
+          </label>
+
+          <input type="tel"
+                 name="phone"
+                 id="phone"
+                 value="{{ request.POST.phone }}"
+                 placeholder="+880 1700 000000"
+                 autocomplete="tel"
+                 maxlength="20"
+                 required
+                 class="w-full h-10 px-3 rounded-lg border
+                        border-gray-200 text-sm outline-none
+                        focus:border-navy">
+        </div>
+
+
+        <!-- RIDER: VEHICLE -->
+        <div id="vehicle-field" class="hidden">
+
+          <label for="vehicle_type"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Vehicle Type
+          </label>
+
+          <select name="vehicle_type"
+                  id="vehicle_type"
+                  disabled
+                  class="w-full h-10 px-3 rounded-lg border
+                         border-gray-200 bg-white text-sm
+                         outline-none focus:border-navy">
+
+            <option value="">Select vehicle</option>
+            <option value="Motorcycle"
+              {% if request.POST.vehicle_type == 'Motorcycle' %}selected{% endif %}>
+              Motorcycle
+            </option>
+            <option value="Bicycle"
+              {% if request.POST.vehicle_type == 'Bicycle' %}selected{% endif %}>
+              Bicycle
+            </option>
+            <option value="Car"
+              {% if request.POST.vehicle_type == 'Car' %}selected{% endif %}>
+              Car
+            </option>
+
+          </select>
+        </div>
+
+
+        <!-- TAILOR: DOCUMENT -->
+        <div id="trade-field" class="hidden">
+
+          <label for="trade_license"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Trade License
+          </label>
+
+          <label for="trade_license"
+                 class="flex items-center gap-3 rounded-lg
+                        border-2 border-dashed border-gray-200
+                        p-3 cursor-pointer hover:border-navy">
+
+            <i data-lucide="cloud-upload"
+               class="w-5 h-5 text-gray-400"></i>
+
+            <span class="flex-1 min-w-0">
+
+              <span id="trade-name"
+                    class="block text-xs font-medium
+                           text-navy truncate">
+                Click to upload Trade License
+              </span>
+
+              <span class="block text-[11px] text-gray-400 mt-1">
+                PDF, JPG or PNG · Max 5 MB
+              </span>
+
+            </span>
+          </label>
+
+          <input type="file"
+                 name="trade_license"
+                 id="trade_license"
+                 accept=".pdf,.jpg,.jpeg,.png"
+                 onchange="displayFile(this,'trade-name')"
+                 disabled
+                 class="sr-only">
+        </div>
+
+
+        <!-- RIDER: DOCUMENT -->
+        <div id="license-field" class="hidden">
+
+          <label for="driving_license"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Driving License
+          </label>
+
+          <label for="driving_license"
+                 class="flex items-center gap-3 rounded-lg
+                        border-2 border-dashed border-gray-200
+                        p-3 cursor-pointer hover:border-navy">
+
+            <i data-lucide="cloud-upload"
+               class="w-5 h-5 text-gray-400"></i>
+
+            <span class="flex-1 min-w-0">
+
+              <span id="license-name"
+                    class="block text-xs font-medium
+                           text-navy truncate">
+                Click to upload Driving License
+              </span>
+
+              <span class="block text-[11px] text-gray-400 mt-1">
+                PDF, JPG or PNG · Max 5 MB
+              </span>
+
+            </span>
+          </label>
+
+          <input type="file"
+                 name="driving_license"
+                 id="driving_license"
+                 accept=".pdf,.jpg,.jpeg,.png"
+                 onchange="displayFile(this,'license-name')"
+                 disabled
+                 class="sr-only">
+        </div>
+
+
+        <!-- PASSWORD -->
+        <div>
+
+          <label for="password"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Password
+          </label>
+
+          <input type="password"
+                 name="password"
+                 id="password"
+                 placeholder="Create a password"
+                 autocomplete="new-password"
+                 required
+                 class="w-full h-10 px-3 rounded-lg border
+                        border-gray-200 text-sm outline-none
+                        focus:border-navy">
+        </div>
+
+
+        <!-- PASSWORD CONFIRMATION -->
+        <div>
+
+          <label for="confirm_password"
+                 class="block text-xs font-medium text-gray-700 mb-1.5">
+            Confirm Password
+          </label>
+
+          <input type="password"
+                 name="confirm_password"
+                 id="confirm_password"
+                 placeholder="Confirm your password"
+                 autocomplete="new-password"
+                 required
+                 class="w-full h-10 px-3 rounded-lg border
+                        border-gray-200 text-sm outline-none
+                        focus:border-navy">
+        </div>
+
+
+        <!-- SUBMIT -->
+        <button type="submit"
+                class="w-full h-10 rounded-lg bg-navy
+                       text-white text-sm font-semibold
+                       hover:bg-slate-800 transition">
+
+          Create Account
+        </button>
+
+      </form>
+
+
+      <p id="approval-note"
+         class="mt-3 text-center text-[11px] text-gray-500">
+      </p>
+
+
+      <p class="mt-4 text-center text-xs text-gray-500">
+
+        Already have an account?
+
+        <a href="{% url 'core:login' %}"
+           class="font-bold text-navy hover:underline">
+          Log in
+        </a>
+
+      </p>
+
+    </div>
+
+  </div>
+
 </div>
 
+
 <script>
-function setRole(role) {
-    document.getElementById('id_role').value = role;
-    
-    ['Customer', 'Tailor', 'Rider'].forEach(r => {
-        const btn = document.getElementById('btn-' + r);
-        if (r === role) {
-            btn.className = "h-10 rounded-xl border text-xs font-semibold transition-colors border-navy bg-navy text-white";
-        } else {
-            btn.className = "h-10 rounded-xl border text-xs font-semibold transition-colors border-gray-200 text-gray-700 hover:border-navy";
-        }
+function chooseRole(role) {
+
+    document.getElementById("registration-role").value = role;
+
+    document.querySelectorAll(".role-button").forEach(button => {
+
+        const active = button.dataset.role === role;
+
+        button.className = active
+            ? "role-button rounded-lg border border-navy " +
+              "bg-navy text-white py-2 text-xs font-semibold"
+            : "role-button rounded-lg border border-gray-200 " +
+              "bg-white text-navy py-2 text-xs " +
+              "hover:border-navy transition";
+
     });
 
-    document.querySelectorAll('.role-fields').forEach(el => {
-        if (el.getAttribute('data-role') === role) {
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
-        }
+
+    const tailor = role === "Tailor";
+    const rider = role === "Rider";
+
+    const fields = [
+        ["shop-field", "shop_name", tailor],
+        ["trade-field", "trade_license", tailor],
+        ["vehicle-field", "vehicle_type", rider],
+        ["license-field", "driving_license", rider]
+    ];
+
+    fields.forEach(([sectionId, inputId, enabled]) => {
+
+        document.getElementById(sectionId)
+            .classList.toggle("hidden", !enabled);
+
+        const input = document.getElementById(inputId);
+
+        input.disabled = !enabled;
+        input.required = enabled;
+
     });
+
+
+    document.getElementById("name-label").textContent =
+        tailor ? "Owner Name" : "Full Name";
+
+
+    document.getElementById("approval-note").textContent =
+        role === "Customer"
+            ? "Your account will be ready after registration."
+            : "Your application requires administrator approval.";
+
 }
+
+
+function displayFile(input, targetId) {
+
+    const label = document.getElementById(targetId);
+
+    if (!input.files.length) return;
+
+    const file = input.files[0];
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert("Maximum file size is 5 MB.");
+        input.value = "";
+        return;
+    }
+
+    label.textContent = file.name;
+
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    chooseRole(
+        document.getElementById("registration-role").value || "Customer"
+    );
+
+});
 </script>
+
 {% endblock %}

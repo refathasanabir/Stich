@@ -1,22 +1,30 @@
+from pathlib import Path
+
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User
-from django.contrib.auth import logout
 from django.contrib import messages
-from tailors.models import TailorShop
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import transaction
+from django.db.models import Q
 
 from .models import Design, UserProfile
+from tailors.models import TailorShop
 from adminpanel.models import Approval
-from adminpanel.models import Approval
-from django.db.models import Q
+
+# =========================================================
+# PUBLIC PAGES
+# =========================================================
+
 
 def home(request):
     return render(request, "core/home.html")
 
 
 def gallery(request):
-    return render(request, "core/gallery.html")
+    return gallery_view(request)
 
 
 def pricing(request):
@@ -28,303 +36,1369 @@ def contact(request):
 
 
 # =========================================================
-# ROLE REDIRECTION
+# USER ROLE REDIRECTION
 # =========================================================
 
-def redirect_based_on_role(user):
-    """Route users to the correct dashboard based on their role."""
 
-    # Admin / Staff / Superuser
+def redirect_based_on_role(user):
+    """
+    Redirect authenticated users according to their database role.
+    Admin privileges come from Django's staff/superuser flags.
+    """
+
     if user.is_staff or user.is_superuser:
         return redirect("adminpanel:dashboard")
 
     try:
-        role = user.profile.role
+        profile = user.profile
     except UserProfile.DoesNotExist:
-        role = "Customer"
+        messages.warning(None, "Your account profile is missing.") if False else None
+        return redirect("core:home")
 
-    # Tailor
-    if role == "Tailor":
+    if profile.role == "Customer":
+        return redirect("customers:dashboard")
+
+    if profile.role == "Tailor":
         return redirect("tailors:dashboard")
 
-    # Rider
-    elif role == "Rider":
+    if profile.role == "Rider":
         return redirect("riders:dashboard")
 
-    # Admin profile
-    elif role == "Admin":
-        return redirect("adminpanel:dashboard")
-
-    # Customer
-    return redirect("customers:dashboard")
+    return redirect("core:home")
 
 
 # =========================================================
 # LOGIN
 # =========================================================
 
+
 def login_view(request):
 
     if request.user.is_authenticated:
         return redirect_based_on_role(request.user)
 
+    selected_role = request.POST.get("role", "Customer")
+    identifier = ""
+
     if request.method == "POST":
 
-        form = AuthenticationForm(
-            request,
-            data=request.POST
-        )
+        identifier = request.POST.get("identifier", "").strip()
 
-        if form.is_valid():
+        password = request.POST.get("password", "")
 
-            user = form.get_user()
+        allowed_roles = {
+            "Customer",
+            "Tailor",
+            "Rider",
+            "Admin",
+        }
 
-            login(request, user)
+        if selected_role not in allowed_roles:
 
-            return redirect_based_on_role(user)
+            messages.error(request, "Please select a valid account type.")
 
-    else:
-        form = AuthenticationForm()
+        elif not identifier or not password:
+
+            messages.error(request, "Enter your email or username and password.")
+
+        else:
+
+            # ---------------------------------------------
+            # Allow login using username or email address.
+            # ---------------------------------------------
+
+            username = identifier
+
+            if "@" in identifier:
+
+                matching_users = User.objects.filter(email__iexact=identifier)
+
+                if matching_users.count() == 1:
+                    username = matching_users.first().username
+
+            user = authenticate(
+                request,
+                username=username,
+                password=password,
+            )
+
+            if user is None:
+
+                messages.error(
+                    request,
+                    "Incorrect credentials, or your account "
+                    "has not yet been activated.",
+                )
+
+            else:
+
+                # -----------------------------------------
+                # Read actual role from the database.
+                # -----------------------------------------
+
+                if user.is_staff or user.is_superuser:
+
+                    actual_role = "Admin"
+
+                else:
+
+                    try:
+                        actual_role = user.profile.role
+
+                    except UserProfile.DoesNotExist:
+                        actual_role = None
+
+                # -----------------------------------------
+                # Validate selected role.
+                # -----------------------------------------
+
+                if actual_role is None:
+
+                    messages.error(
+                        request,
+                        "Your user profile is missing. "
+                        "Please contact an administrator.",
+                    )
+
+                elif actual_role != selected_role:
+
+                    messages.error(
+                        request,
+                        "This account does not match " "the selected login role.",
+                    )
+
+                else:
+
+                    login(request, user)
+
+                    return redirect_based_on_role(user)
 
     return render(
         request,
         "core/login.html",
-        {"form": form}
+        {
+            "selected_role": selected_role,
+            "identifier": identifier,
+        },
     )
+
+
+# =========================================================
+# REGISTRATION DOCUMENT VALIDATION
+# =========================================================
+
+ALLOWED_DOCUMENT_EXTENSIONS = {
+    ".pdf",
+    ".jpg",
+    ".jpeg",
+    ".png",
+}
+
+MAX_DOCUMENT_SIZE = 5 * 1024 * 1024
+
+
+def validate_registration_document(document):
+    """
+    Basic extension and size validation.
+    Stronger file verification and private document
+    storage are required before production deployment.
+    """
+
+    if not document:
+
+        raise ValidationError("Please upload the required document.")
+
+    extension = Path(document.name).suffix.lower()
+
+    if extension not in ALLOWED_DOCUMENT_EXTENSIONS:
+
+        raise ValidationError("Only PDF, JPG, JPEG and PNG files are accepted.")
+
+    if document.size > MAX_DOCUMENT_SIZE:
+
+        raise ValidationError("The maximum document size is 5 MB.")
 
 
 # =========================================================
 # REGISTER
 # =========================================================
 
-# Add this to your imports at the top!
-
-# ... (keep your home, login_view, etc) ...
-
 
 def register_view(request):
+
     if request.user.is_authenticated:
         return redirect_based_on_role(request.user)
 
+    selected_role = request.POST.get(
+        "role",
+        "Customer",
+    )
+
     if request.method == "POST":
-        role = request.POST.get("role", "").strip()
 
-        # =====================================================
-        # TAILOR
-        # =====================================================
+        role = selected_role
+
+        # ---------------------------------------------
+        # Common registration fields
+        # ---------------------------------------------
+
+        full_name = request.POST.get("full_name", "").strip()
+
+        
+
+        email = request.POST.get("email", "").strip()
+
+        username = email
+
+        phone = request.POST.get("phone", "").strip()
+
+        password = request.POST.get("password", "")
+
+        confirm_password = request.POST.get("confirm_password", "")
+
+        # ---------------------------------------------
+        # Role-specific registration fields
+        # ---------------------------------------------
+
+        shop_name = request.POST.get("shop_name", "").strip()
+
+        vehicle_type = request.POST.get("vehicle_type", "").strip()
+
+        trade_license = request.FILES.get("trade_license")
+
+        driving_license = request.FILES.get("driving_license")
+
+        errors = []
+
+        # ---------------------------------------------
+        # Role validation
+        # ---------------------------------------------
+
+        if role not in {
+            "Customer",
+            "Tailor",
+            "Rider",
+        }:
+
+            errors.append("Please select a valid registration role.")
+
+        # ---------------------------------------------
+        # Required field validation
+        # ---------------------------------------------
+
+        if not all(
+            [
+                full_name,
+                username,
+                email,
+                phone,
+                password,
+                confirm_password,
+            ]
+        ):
+
+            errors.append("Please complete all required fields.")
+
+        # ---------------------------------------------
+        # Password validation
+        # ---------------------------------------------
+
+        if password != confirm_password:
+
+            errors.append("Passwords do not match.")
+
+        # elif password:
+
+        #     try:
+
+        #         validate_password(password)
+
+        #     except ValidationError as exc:
+
+        #         errors.extend(exc.messages)
+
+        # ---------------------------------------------
+        # Email validation
+        # ---------------------------------------------
+
+        if email:
+
+            try:
+
+                validate_email(email)
+
+            except ValidationError:
+
+                errors.append("Please enter a valid email address.")
+
+        # ---------------------------------------------
+        # Duplicate account checks
+        # ---------------------------------------------
+
+        if username and User.objects.filter(username__iexact=username).exists():
+
+            errors.append("This username is already registered.")
+
+        if email and User.objects.filter(email__iexact=email).exists():
+
+            errors.append("This email address is already registered.")
+
+        # ---------------------------------------------
+        # Tailor validation
+        # ---------------------------------------------
+
         if role == "Tailor":
-            username = request.POST.get("username_tailor", "").strip()
-            email = request.POST.get("email_tailor", "").strip()
-            phone = request.POST.get("phone_tailor", "").strip()
-            password = request.POST.get("password_tailor", "")
-            shop_name = request.POST.get("shop_name", "").strip()
 
-            if not username or not password or not email or not shop_name:
-                messages.error(request, "Please fill in all required Tailor fields.")
-                return render(request, "core/register.html")
+            if not shop_name:
 
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "This username is already taken.")
-                return render(request, "core/register.html")
+                errors.append("Shop name is required.")
 
-            # 1. Create Base User and lock it
-            user = User.objects.create_user(
-                username=username, email=email, password=password
-            )
-            user.is_active = False
-            user.save()
+            try:
 
-            # 2. Create UserProfile (with Pending status)
-            UserProfile.objects.create(
-                user=user,
-                role="Tailor",
-                approval_status="Pending Approval",
-                phone=phone,
-            )
+                validate_registration_document(trade_license)
 
-            # 3. Create linked TailorShop
-            TailorShop.objects.create(owner=user, name=shop_name)
+            except ValidationError as exc:
 
-            # 4. Create the Admin Approval Record
-            Approval.objects.create(user=user, role="Tailor", status="Pending")
+                errors.extend(exc.messages)
 
-            messages.success(
-                request, "Tailor account created successfully! Awaiting Admin approval."
-            )
-            return redirect("core:login")
+        # ---------------------------------------------
+        # Rider validation
+        # ---------------------------------------------
 
-        # =====================================================
-        # RIDER
-        # =====================================================
-        elif role == "Rider":
-            username = request.POST.get("username_rider", "").strip()
-            phone = request.POST.get("phone_rider", "").strip()
-            password = request.POST.get("password_rider", "")
-            vehicle_type = request.POST.get("vehicle_type", "Motorcycle")
+        if role == "Rider":
 
-            if not username or not password:
-                messages.error(request, "Please fill in all required Rider fields.")
-                return render(request, "core/register.html")
+            if vehicle_type not in {
+                "Motorcycle",
+                "Bicycle",
+                "Car",
+            }:
 
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "This username is already taken.")
-                return render(request, "core/register.html")
+                errors.append("Please select a valid vehicle type.")
 
-            # 1. Create Base User and lock it
-            user = User.objects.create_user(username=username, password=password)
-            user.is_active = False
-            user.save()
+            try:
 
-            # 2. Create UserProfile
-            UserProfile.objects.create(
-                user=user,
-                role="Rider",
-                approval_status="Pending Approval",
-                vehicle_type=vehicle_type,
-                phone=phone,
+                validate_registration_document(driving_license)
+
+            except ValidationError as exc:
+
+                errors.extend(exc.messages)
+
+        # ---------------------------------------------
+        # Return to registration if validation fails
+        # ---------------------------------------------
+
+        if errors:
+
+            for error in errors:
+
+                messages.error(request, error)
+
+            return render(
+                request,
+                "core/register.html",
+                {
+                    "selected_role": role,
+                },
             )
 
-            # 3. Create the Admin Approval Record
-            Approval.objects.create(user=user, role="Rider", status="Pending")
+        # ---------------------------------------------
+        # Prepare user information
+        # ---------------------------------------------
 
-            messages.success(
-                request, "Rider account created successfully! Awaiting Admin approval."
-            )
-            return redirect("core:login")
+        names = full_name.split(maxsplit=1)
 
-        # =====================================================
-        # CUSTOMER
-        # =====================================================
-        elif role == "Customer":
-            username = request.POST.get("username_customer", "").strip()
-            email = request.POST.get("email_customer", "").strip()
-            phone = request.POST.get("phone_customer", "").strip()
-            password = request.POST.get("password_customer", "")
+        first_name = names[0]
 
-            if not username or not password:
-                messages.error(request, "Please fill in all required Customer fields.")
-                return render(request, "core/register.html")
+        last_name = names[1] if len(names) > 1 else ""
 
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "This username is already taken.")
-                return render(request, "core/register.html")
+        # ---------------------------------------------
+        # Save complete registration atomically
+        # ---------------------------------------------
+
+        with transaction.atomic():
+
+            # Customers can log in immediately.
+            # Tailors and riders require administrator approval.
 
             user = User.objects.create_user(
-                username=username, email=email, password=password
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                is_active=(role == "Customer"),
             )
+
+            # -----------------------------------------
+            # Create linked user profile.
+            # -----------------------------------------
 
             UserProfile.objects.create(
                 user=user,
-                role="Customer",
-                approval_status="Pending Approval",
+                role=role,
                 phone=phone,
+                approval_status=(
+                    "Approved" if role == "Customer" else "Pending Approval"
+                ),
+                vehicle_type=(vehicle_type if role == "Rider" else None),
+                driving_license=(driving_license if role == "Rider" else None),
             )
+
+            # -----------------------------------------
+            # Tailor shop and approval record.
+            # -----------------------------------------
+
+            if role == "Tailor":
+
+                TailorShop.objects.create(
+                    owner=user,
+                    name=shop_name,
+                    trade_license=trade_license,
+                )
+
+                Approval.objects.create(
+                    user=user,
+                    role="Tailor",
+                    status="Pending",
+                )
+
+            # -----------------------------------------
+            # Rider approval record.
+            # -----------------------------------------
+
+            elif role == "Rider":
+
+                Approval.objects.create(
+                    user=user,
+                    role="Rider",
+                    status="Pending",
+                )
+
+        # ---------------------------------------------
+        # Success message
+        # ---------------------------------------------
+
+        if role == "Customer":
+
+            messages.success(
+                request, "Your account was created successfully. " "Please log in."
+            )
+
+        else:
 
             messages.success(
                 request,
-                "Customer account created successfully! Awaiting Admin approval.",
+                "Registration submitted successfully. "
+                "Please wait for administrator approval.",
             )
-            return redirect("core:login")
 
-        else:
-            messages.error(request, "Please select a valid account type.")
+        return redirect("core:login")
 
-    return render(request, "core/register.html")
+    # ---------------------------------------------
+    # GET: Display the registration form
+    # ---------------------------------------------
 
-
-# =========================================================
-# PUBLIC PAGES
-# =========================================================
-
-def tailor_list(request):
     return render(
         request,
-        "core/tailor_list.html"
+        "core/register.html",
+        {
+            "selected_role": selected_role,
+        },
+    )
+
+
+# =========================================================
+# PUBLIC TAILOR PAGES
+# =========================================================
+
+
+def tailor_list(request):
+
+    return render(
+        request,
+        "core/tailor_list.html",
     )
 
 
 def tailor_details(request):
+
     return render(
         request,
-        "core/tailor_details.html"
+        "core/tailor_details.html",
     )
+
+
+# =========================================================
+# MARKETPLACE
+# =========================================================
 
 
 def marketplace_gallery_view(request):
 
-    designs_list = Design.objects.all().order_by(
-        "-created_at"
-    )
-
-    return render(
-        request,
-        "core/marketplace.html",
-        {"designs": designs_list}
-    )
-
-
-def marketplace_gallery_view(request):
     designs = Design.objects.all()
 
-    # 1. Search filter (by design title, description, or shop name)
-    search_query = request.GET.get("q", "").strip()
+    # ---------------------------------------------
+    # Search
+    # ---------------------------------------------
+
+    search_query = request.GET.get(
+        "q",
+        "",
+    ).strip()
+
     if search_query:
+
         designs = designs.filter(
             Q(title__icontains=search_query)
             | Q(description__icontains=search_query)
             | Q(shop__name__icontains=search_query)
         )
 
-    # 2. Category filter (Shirt, Panjabi, Suit, etc.)
-    category = request.GET.get("category", "").strip()
+    # ---------------------------------------------
+    # Category filtering
+    # ---------------------------------------------
+
+    category = request.GET.get(
+        "category",
+        "",
+    ).strip()
+
     if category and category != "All":
+
         designs = designs.filter(category=category)
 
-    # 3. Sorting options (Newest, Price low/high, Rating)
-    sort_by = request.GET.get("sort", "newest")
+    # ---------------------------------------------
+    # Sorting
+    # ---------------------------------------------
+
+    sort_by = request.GET.get(
+        "sort",
+        "newest",
+    )
+
     if sort_by == "price_low":
+
         designs = designs.order_by("price")
+
     elif sort_by == "price_high":
+
         designs = designs.order_by("-price")
+
     elif sort_by == "rating":
+
         designs = designs.order_by("-rating")
+
     else:
+
         designs = designs.order_by("-created_at")
 
-    context = {
-        "designs": designs,
-        "search_query": search_query,
-        "selected_category": category,
-        "selected_sort": sort_by,
-    }
+    return render(
+        request,
+        "core/marketplace.html",
+        {
+            "designs": designs,
+            "search_query": search_query,
+            "selected_category": category,
+            "selected_sort": sort_by,
+        },
+    )
 
-    return render(request, "core/marketplace.html", context)
+
+# =========================================================
+# GALLERY
+# =========================================================
 
 
 def gallery_view(request):
 
-    gallery_items = Design.objects.all().order_by(
-        "-created_at"
-    )
+    gallery_items = Design.objects.all().order_by("-created_at")
 
     return render(
         request,
         "core/gallery.html",
-        {"gallery_items": gallery_items}
+        {
+            "gallery_items": gallery_items,
+        },
     )
 
 
+# =========================================================
+# MARKETPLACE DESIGN DETAILS
+# =========================================================
+
+
 def marketplace_detail_view(request, pk):
-    design = get_object_or_404(Design, pk=pk)
-    return render(request, "core/marketplace_detail.html", {"design": design})
+
+    design = get_object_or_404(
+        Design,
+        pk=pk,
+    )
+
+    return render(
+        request,
+        "core/marketplace_detail.html",
+        {
+            "design": design,
+        },
+    )
 
 
 # =========================================================
 # LOGOUT
 # =========================================================
 
+
 def logout_view(request):
 
     logout(request)
 
     return redirect("core:home")
+
+
+# from pathlib import Path
+
+# from django.shortcuts import render, get_object_or_404, redirect
+# from django.contrib import messages
+# from django.contrib.auth import login, logout, authenticate
+# from django.contrib.auth.models import User
+# from django.contrib.auth.password_validation import validate_password
+# from django.core.exceptions import ValidationError
+# from django.core.validators import validate_email
+# from django.db import transaction
+# from django.db.models import Q
+
+# from .models import Design, UserProfile
+# from tailors.models import TailorShop
+# from adminpanel.models import Approval
+
+
+# # =========================================================
+# # PUBLIC PAGES
+# # =========================================================
+
+# def home(request):
+#     return render(request, "core/home.html")
+
+
+# def gallery(request):
+#     return gallery_view(request)
+
+
+# def pricing(request):
+#     return render(request, "core/pricing.html")
+
+
+# def contact(request):
+#     return render(request, "core/contact.html")
+
+
+# # =========================================================
+# # USER ROLE REDIRECTION
+# # =========================================================
+
+# def redirect_based_on_role(user):
+#     """
+#     Redirect authenticated users according to their database role.
+#     Admin privileges come from Django's staff/superuser flags.
+#     """
+
+#     if user.is_staff or user.is_superuser:
+#         return redirect("adminpanel:dashboard")
+
+#     try:
+#         profile = user.profile
+#     except UserProfile.DoesNotExist:
+#         messages.warning(
+#             None,
+#             "Your account profile is missing."
+#         ) if False else None
+#         return redirect("core:home")
+
+#     if profile.role == "Customer":
+#         return redirect("customers:dashboard")
+
+#     if profile.role == "Tailor":
+#         return redirect("tailors:dashboard")
+
+#     if profile.role == "Rider":
+#         return redirect("riders:dashboard")
+
+#     return redirect("core:home")
+
+
+# # =========================================================
+# # LOGIN
+# # =========================================================
+
+# def login_view(request):
+
+#     if request.user.is_authenticated:
+#         return redirect_based_on_role(request.user)
+
+#     selected_role = request.POST.get("role", "Customer")
+#     identifier = ""
+
+#     if request.method == "POST":
+
+#         identifier = request.POST.get(
+#             "identifier", ""
+#         ).strip()
+
+#         password = request.POST.get(
+#             "password", ""
+#         )
+
+#         allowed_roles = {
+#             "Customer",
+#             "Tailor",
+#             "Rider",
+#             "Admin",
+#         }
+
+#         if selected_role not in allowed_roles:
+
+#             messages.error(
+#                 request,
+#                 "Please select a valid account type."
+#             )
+
+#         elif not identifier or not password:
+
+#             messages.error(
+#                 request,
+#                 "Enter your email or username and password."
+#             )
+
+#         else:
+
+#             # ---------------------------------------------
+#             # Allow login using username or email address.
+#             # ---------------------------------------------
+
+#             username = identifier
+
+#             if "@" in identifier:
+
+#                 matching_users = User.objects.filter(
+#                     email__iexact=identifier
+#                 )
+
+#                 if matching_users.count() == 1:
+#                     username = matching_users.first().username
+
+#             user = authenticate(
+#                 request,
+#                 username=username,
+#                 password=password,
+#             )
+
+#             if user is None:
+
+#                 messages.error(
+#                     request,
+#                     "Incorrect credentials, or your account "
+#                     "has not yet been activated."
+#                 )
+
+#             else:
+
+#                 # -----------------------------------------
+#                 # Read actual role from the database.
+#                 # -----------------------------------------
+
+#                 if user.is_staff or user.is_superuser:
+
+#                     actual_role = "Admin"
+
+#                 else:
+
+#                     try:
+#                         actual_role = user.profile.role
+
+#                     except UserProfile.DoesNotExist:
+#                         actual_role = None
+
+#                 # -----------------------------------------
+#                 # Validate selected role.
+#                 # -----------------------------------------
+
+#                 if actual_role is None:
+
+#                     messages.error(
+#                         request,
+#                         "Your user profile is missing. "
+#                         "Please contact an administrator."
+#                     )
+
+#                 elif actual_role != selected_role:
+
+#                     messages.error(
+#                         request,
+#                         "This account does not match "
+#                         "the selected login role."
+#                     )
+
+#                 else:
+
+#                     login(request, user)
+
+#                     return redirect_based_on_role(user)
+
+#     return render(
+#         request,
+#         "core/login.html",
+#         {
+#             "selected_role": selected_role,
+#             "identifier": identifier,
+#         },
+#     )
+
+
+# # =========================================================
+# # REGISTRATION DOCUMENT VALIDATION
+# # =========================================================
+
+# ALLOWED_DOCUMENT_EXTENSIONS = {
+#     ".pdf",
+#     ".jpg",
+#     ".jpeg",
+#     ".png",
+# }
+
+# MAX_DOCUMENT_SIZE = 5 * 1024 * 1024
+
+
+# def validate_registration_document(document):
+#     """
+#     Basic extension and size validation.
+#     Stronger file verification and private document
+#     storage are required before production deployment.
+#     """
+
+#     if not document:
+
+#         raise ValidationError(
+#             "Please upload the required document."
+#         )
+
+#     extension = Path(document.name).suffix.lower()
+
+#     if extension not in ALLOWED_DOCUMENT_EXTENSIONS:
+
+#         raise ValidationError(
+#             "Only PDF, JPG, JPEG and PNG files are accepted."
+#         )
+
+#     if document.size > MAX_DOCUMENT_SIZE:
+
+#         raise ValidationError(
+#             "The maximum document size is 5 MB."
+#         )
+
+
+# # =========================================================
+# # REGISTER
+# # =========================================================
+
+# def register_view(request):
+
+#     if request.user.is_authenticated:
+#         return redirect_based_on_role(request.user)
+
+#     selected_role = request.POST.get(
+#         "role",
+#         "Customer",
+#     )
+
+#     if request.method == "POST":
+
+#         role = selected_role
+
+#         # ---------------------------------------------
+#         # Common registration fields
+#         # ---------------------------------------------
+
+#         full_name = request.POST.get(
+#             "full_name", ""
+#         ).strip()
+
+#         username = request.POST.get(
+#             "username", ""
+#         ).strip()
+
+#         email = request.POST.get(
+#             "email", ""
+#         ).strip()
+
+#         phone = request.POST.get(
+#             "phone", ""
+#         ).strip()
+
+#         password = request.POST.get(
+#             "password", ""
+#         )
+
+#         confirm_password = request.POST.get(
+#             "confirm_password", ""
+#         )
+
+#         # ---------------------------------------------
+#         # Role-specific registration fields
+#         # ---------------------------------------------
+
+#         shop_name = request.POST.get(
+#             "shop_name", ""
+#         ).strip()
+
+#         vehicle_type = request.POST.get(
+#             "vehicle_type", ""
+#         ).strip()
+
+#         trade_license = request.FILES.get(
+#             "trade_license"
+#         )
+
+#         driving_license = request.FILES.get(
+#             "driving_license"
+#         )
+
+#         errors = []
+
+#         # ---------------------------------------------
+#         # Role validation
+#         # ---------------------------------------------
+
+#         if role not in {
+#             "Customer",
+#             "Tailor",
+#             "Rider",
+#         }:
+
+#             errors.append(
+#                 "Please select a valid registration role."
+#             )
+
+#         # ---------------------------------------------
+#         # Required field validation
+#         # ---------------------------------------------
+
+#         if not all([
+#             full_name,
+#             username,
+#             email,
+#             phone,
+#             password,
+#             confirm_password,
+#         ]):
+
+#             errors.append(
+#                 "Please complete all required fields."
+#             )
+
+#         # ---------------------------------------------
+#         # Password validation
+#         # ---------------------------------------------
+
+#         if password != confirm_password:
+
+#             errors.append(
+#                 "Passwords do not match."
+#             )
+
+#         elif password:
+
+#             try:
+
+#                 validate_password(password)
+
+#             except ValidationError as exc:
+
+#                 errors.extend(exc.messages)
+
+#         # ---------------------------------------------
+#         # Email validation
+#         # ---------------------------------------------
+
+#         if email:
+
+#             try:
+
+#                 validate_email(email)
+
+#             except ValidationError:
+
+#                 errors.append(
+#                     "Please enter a valid email address."
+#                 )
+
+#         # ---------------------------------------------
+#         # Duplicate account checks
+#         # ---------------------------------------------
+
+#         if username and User.objects.filter(
+#             username__iexact=username
+#         ).exists():
+
+#             errors.append(
+#                 "This username is already registered."
+#             )
+
+#         if email and User.objects.filter(
+#             email__iexact=email
+#         ).exists():
+
+#             errors.append(
+#                 "This email address is already registered."
+#             )
+
+#         # ---------------------------------------------
+#         # Tailor validation
+#         # ---------------------------------------------
+
+#         if role == "Tailor":
+
+#             if not shop_name:
+
+#                 errors.append(
+#                     "Shop name is required."
+#                 )
+
+#             try:
+
+#                 validate_registration_document(
+#                     trade_license
+#                 )
+
+#             except ValidationError as exc:
+
+#                 errors.extend(exc.messages)
+
+#         # ---------------------------------------------
+#         # Rider validation
+#         # ---------------------------------------------
+
+#         if role == "Rider":
+
+#             if vehicle_type not in {
+#                 "Motorcycle",
+#                 "Bicycle",
+#                 "Car",
+#             }:
+
+#                 errors.append(
+#                     "Please select a valid vehicle type."
+#                 )
+
+#             try:
+
+#                 validate_registration_document(
+#                     driving_license
+#                 )
+
+#             except ValidationError as exc:
+
+#                 errors.extend(exc.messages)
+
+#         # ---------------------------------------------
+#         # Return to registration if validation fails
+#         # ---------------------------------------------
+
+#         if errors:
+
+#             for error in errors:
+
+#                 messages.error(
+#                     request,
+#                     error
+#                 )
+
+#             return render(
+#                 request,
+#                 "core/register.html",
+#                 {
+#                     "selected_role": role,
+#                 },
+#             )
+
+#         # ---------------------------------------------
+#         # Prepare user information
+#         # ---------------------------------------------
+
+#         names = full_name.split(maxsplit=1)
+
+#         first_name = names[0]
+
+#         last_name = (
+#             names[1]
+#             if len(names) > 1
+#             else ""
+#         )
+
+#         # ---------------------------------------------
+#         # Save complete registration atomically
+#         # ---------------------------------------------
+
+#         with transaction.atomic():
+
+#             # Customers can log in immediately.
+#             # Tailors and riders require administrator approval.
+
+#             user = User.objects.create_user(
+#                 username=username,
+#                 email=email,
+#                 password=password,
+#                 first_name=first_name,
+#                 last_name=last_name,
+#                 is_active=(role == "Customer"),
+#             )
+
+#             # -----------------------------------------
+#             # Create linked user profile.
+#             # -----------------------------------------
+
+#             UserProfile.objects.create(
+#                 user=user,
+#                 role=role,
+#                 phone=phone,
+
+#                 approval_status=(
+#                     "Approved"
+#                     if role == "Customer"
+#                     else "Pending Approval"
+#                 ),
+
+#                 vehicle_type=(
+#                     vehicle_type
+#                     if role == "Rider"
+#                     else None
+#                 ),
+
+#                 driving_license=(
+#                     driving_license
+#                     if role == "Rider"
+#                     else None
+#                 ),
+#             )
+
+#             # -----------------------------------------
+#             # Tailor shop and approval record.
+#             # -----------------------------------------
+
+#             if role == "Tailor":
+
+#                 TailorShop.objects.create(
+#                     owner=user,
+#                     name=shop_name,
+#                     trade_license=trade_license,
+#                 )
+
+#                 Approval.objects.create(
+#                     user=user,
+#                     role="Tailor",
+#                     status="Pending",
+#                 )
+
+#             # -----------------------------------------
+#             # Rider approval record.
+#             # -----------------------------------------
+
+#             elif role == "Rider":
+
+#                 Approval.objects.create(
+#                     user=user,
+#                     role="Rider",
+#                     status="Pending",
+#                 )
+
+#         # ---------------------------------------------
+#         # Success message
+#         # ---------------------------------------------
+
+#         if role == "Customer":
+
+#             messages.success(
+#                 request,
+#                 "Your account was created successfully. "
+#                 "Please log in."
+#             )
+
+#         else:
+
+#             messages.success(
+#                 request,
+#                 "Registration submitted successfully. "
+#                 "Please wait for administrator approval."
+#             )
+
+#         return redirect(
+#             "core:login"
+#         )
+
+#     # ---------------------------------------------
+#     # GET: Display the registration form
+#     # ---------------------------------------------
+
+#     return render(
+#         request,
+#         "core/register.html",
+#         {
+#             "selected_role": selected_role,
+#         },
+#     )
+
+
+# # =========================================================
+# # PUBLIC TAILOR PAGES
+# # =========================================================
+
+# def tailor_list(request):
+
+#     return render(
+#         request,
+#         "core/tailor_list.html",
+#     )
+
+
+# def tailor_details(request):
+
+#     return render(
+#         request,
+#         "core/tailor_details.html",
+#     )
+
+
+# # =========================================================
+# # MARKETPLACE
+# # =========================================================
+
+# def marketplace_gallery_view(request):
+
+#     designs = Design.objects.all()
+
+#     # ---------------------------------------------
+#     # Search
+#     # ---------------------------------------------
+
+#     search_query = request.GET.get(
+#         "q",
+#         "",
+#     ).strip()
+
+#     if search_query:
+
+#         designs = designs.filter(
+#             Q(title__icontains=search_query)
+#             | Q(description__icontains=search_query)
+#             | Q(shop__name__icontains=search_query)
+#         )
+
+#     # ---------------------------------------------
+#     # Category filtering
+#     # ---------------------------------------------
+
+#     category = request.GET.get(
+#         "category",
+#         "",
+#     ).strip()
+
+#     if category and category != "All":
+
+#         designs = designs.filter(
+#             category=category
+#         )
+
+#     # ---------------------------------------------
+#     # Sorting
+#     # ---------------------------------------------
+
+#     sort_by = request.GET.get(
+#         "sort",
+#         "newest",
+#     )
+
+#     if sort_by == "price_low":
+
+#         designs = designs.order_by(
+#             "price"
+#         )
+
+#     elif sort_by == "price_high":
+
+#         designs = designs.order_by(
+#             "-price"
+#         )
+
+#     elif sort_by == "rating":
+
+#         designs = designs.order_by(
+#             "-rating"
+#         )
+
+#     else:
+
+#         designs = designs.order_by(
+#             "-created_at"
+#         )
+
+#     return render(
+#         request,
+#         "core/marketplace.html",
+#         {
+#             "designs": designs,
+#             "search_query": search_query,
+#             "selected_category": category,
+#             "selected_sort": sort_by,
+#         },
+#     )
+
+
+# # =========================================================
+# # GALLERY
+# # =========================================================
+
+# def gallery_view(request):
+
+#     gallery_items = Design.objects.all().order_by(
+#         "-created_at"
+#     )
+
+#     return render(
+#         request,
+#         "core/gallery.html",
+#         {
+#             "gallery_items": gallery_items,
+#         },
+#     )
+
+
+# # =========================================================
+# # MARKETPLACE DESIGN DETAILS
+# # =========================================================
+
+# def marketplace_detail_view(request, pk):
+
+#     design = get_object_or_404(
+#         Design,
+#         pk=pk,
+#     )
+
+#     return render(
+#         request,
+#         "core/marketplace_detail.html",
+#         {
+#             "design": design,
+#         },
+#     )
+
+
+# # =========================================================
+# # LOGOUT
+# # =========================================================
+
+# def logout_view(request):
+
+#     logout(request)
+
+#     return redirect(
+#         "core:home"
+#     )

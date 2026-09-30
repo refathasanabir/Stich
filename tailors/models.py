@@ -13,6 +13,9 @@ class TailorShop(models.Model):
     specialties = models.JSONField(default=list, blank=True)
     image = models.ImageField(upload_to="shops/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    trade_license = models.FileField(
+        upload_to="private/tailor_licenses/", blank=True, null=True
+    )
 
     def __str__(self):
         return self.name

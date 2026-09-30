@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import PasswordChangeView
 
 app_name = "customers"
 
@@ -33,4 +34,9 @@ urlpatterns = [
     path("shops/<int:shop_id>/", views.shop_detail_view, name="shop_detail"),
     path("settings/", views.settings_view, name="settings"),
     path("checkout/<int:design_id>/", views.checkout, name="checkout"),
+    path(
+        "password-change/",
+        PasswordChangeView.as_view(template_name="core/password_change.html"),
+        name="password_change",
+    ),
 ]
